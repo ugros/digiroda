@@ -27,7 +27,7 @@ import ussoft.USDialogs;
  */
 public class DigiDB {
 
-    private Connection connect;
+    private Connection localDB;
     final TableView table = new TableView();
     public ResultSet rs;
     ObservableList<String[]> dataRows = FXCollections.observableArrayList();
@@ -38,7 +38,7 @@ public class DigiDB {
      * @return	Connection
      */
     public Connection getConnect() {
-        return connect;
+        return localDB;
     }
 
     
@@ -49,14 +49,12 @@ public class DigiDB {
      * @param database	database or schema name
      * @param user	username to login
      * @param password	password to login
-     * @throws ClassNotFoundException
-     * @throws SQLException
      */
     public DigiDB(String host, String database, String user, String password) {
        
         try {
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();                
-            connect = DriverManager.getConnection(
+            localDB = DriverManager.getConnection(
                       "jdbc:derby:" + database + ";create=true;" + "user=" + user + ";password=" + password);
                     //"jdbc:derby:" + database + ";create=true;");
             LOGGER.log(Level.INFO, "Connected to Derby database");
@@ -85,7 +83,7 @@ public class DigiDB {
      * @throws SQLException
      */
     public void close() throws SQLException {
-        connect.close();
+        localDB.close();
     }
 
     
@@ -94,19 +92,18 @@ public class DigiDB {
      *
      * @param sql	String, which contains an sql query
      * @return	USDataResult - you can simply get columns and fields
-     * @throws SQLException
      */
     public USDataResult executeSqlToDataResult(String sql) {
         try {
             Statement stmt;
-            stmt = (Statement) connect.createStatement();
+            stmt = (Statement) localDB.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            
             return new USDataResult(rs);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            return null;
         }
-        return null;
+        
     }
 
     
@@ -115,12 +112,11 @@ public class DigiDB {
      *
      * @param sql	String, which contains an sql query
      * @return	ResultSet
-     * @throws SQLException
      */
     public ResultSet executeSql(String sql) {
         try {
             Statement stmt;
-            stmt = (Statement) connect.createStatement();
+            stmt = (Statement) localDB.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             
             return rs;
@@ -136,7 +132,6 @@ public class DigiDB {
      *
      * @param sql	String, which contains an sql query
      * @return	javafx.scene.control.TableView - you can add it to a javafx root
-     * @throws SQLException
      */
     public TableView executeSqlToTable(String sql){
        return executeSqlToTable(sql, false);        
@@ -150,7 +145,6 @@ public class DigiDB {
      * @param sql
      * @param editable
      * @return
-     * @throws SQLException
      */
     private TableView executeSqlToTable(String sql, boolean editable){
 

@@ -1,0 +1,62 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package ussoft;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
+
+public class USLogger extends Logger {
+
+    protected USLogger(String name, String resourceBundleName) {
+        super(name, resourceBundleName);
+        // TODO Auto-generated constructor stub
+        try {
+            setup();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    static private FileHandler fileHTML;
+    static private Formatter formatterHTML;
+    static private String fileName;
+
+    static public String setup() throws IOException {
+
+        // get the global logger to configure it
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+        // suppress the logging output to the console
+        Logger rootLogger = Logger.getLogger("");
+        Handler[] handlers = rootLogger.getHandlers();
+        if (handlers[0] instanceof ConsoleHandler) {
+            rootLogger.removeHandler(handlers[0]);
+        }
+
+        // logger.setLevel(Level.FINEST);
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        Date date = new Date();
+        fileName = "./LOG_" + dateFormat.format(date).toString() + ".html";
+        fileHTML = new FileHandler(fileName);
+
+        // create an HTML formatter
+        formatterHTML = new USHtmlFormatter();
+        fileHTML.setFormatter(formatterHTML);
+        logger.addHandler(fileHTML);
+
+        return fileName;
+
+    }
+
+}

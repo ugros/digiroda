@@ -14,6 +14,10 @@ public class DigiUser extends ussoft.User {
     private String LOGINTEXT;
     private String LOGINTITLE;
     
+    private void login() {
+        
+    }
+    
     public DigiUser(String userName, String password) {
         super(userName, password);
         if ((getUserName() == null) || (getUserName().equals(""))) {
@@ -22,7 +26,7 @@ public class DigiUser extends ussoft.User {
             this.password = p.getValue().toString();
         }
         CONNECTS = new DigiDB(this.userName, this.password);
-        LOGGER.log(Level.INFO, this.userName + " logged in.");        
+       // LOGGER.log(Level.INFO, this.userName + " logged in.");        
     }
 
     @Override

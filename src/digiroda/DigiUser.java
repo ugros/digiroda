@@ -10,31 +10,24 @@ import java.util.logging.Level;
 
 public class DigiUser extends ussoft.User {
 
-    private static DigiDB CONNECT;
-    private static String DBHOST;
-    private static String DBSCHEMA;
+    private final DigiDB CONNECTS;
     private String LOGINTEXT;
     private String LOGINTITLE;
-
-    public DigiUser() {
-        super();
-    }
-
+    
     public DigiUser(String userName, String password) {
         super(userName, password);
-    }
-
-    @Override
-    protected boolean checkUser() {
         if ((getUserName() == null) || (getUserName().equals(""))) {
             Pair p = USDialogs.login(LOGINTITLE, LOGINTEXT);
             this.userName = p.getKey().toString();
             this.password = p.getValue().toString();
         }
-        CONNECT = new DigiDB(DBHOST, DBSCHEMA, this.userName, this.password);
-        LOGGER.log(Level.INFO,this.userName + " logged in.");
-        //USDialogs.error(language.getProperty("LOGINERROR"), e.getMessage());
-        return (CONNECT != null);
+        CONNECTS = new DigiDB(this.userName, this.password);
+        LOGGER.log(Level.INFO, this.userName + " logged in.");        
+    }
+
+    @Override
+    protected boolean checkUser() {
+        return (CONNECTS != null);
     }
 
     @Override
@@ -63,10 +56,6 @@ public class DigiUser extends ussoft.User {
 
     @Override
     protected void initialize() {
-        // setting up database connection
-        DBHOST = config.getProperty("DBHOST");
-        DBSCHEMA = config.getProperty("DBSCHEMA");
-
         // setting up texts
         LOGINTEXT = language.getProperty("LOGINTEXT");
         LOGINTITLE = language.getProperty("LOGINTITLE");
@@ -77,16 +66,7 @@ public class DigiUser extends ussoft.User {
 
     }
 
-    public static DigiDB getCONNECT() {
-        return CONNECT;
+    public DigiDB getConnects() {
+        return CONNECTS;
     }
-
-    public static String getDBHOST() {
-        return DBHOST;
-    }
-
-    public static String getDBSCHEMA() {
-        return DBSCHEMA;
-    }
-
 }

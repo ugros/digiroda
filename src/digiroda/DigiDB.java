@@ -6,8 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import static digiroda.DigiController.LOGGER;
-import static digiroda.DigiController.language;
 import java.sql.Statement;
 import java.util.logging.Level;
 
@@ -19,63 +17,119 @@ import javafx.scene.control.TableView;
 import ussoft.USDataResult;
 import ussoft.USDialogs;
 
+import static digiroda.DigiController.LOGGER;
+import static digiroda.DigiController.language;
+import static digiroda.DigiController.config;
+
 /**
- * The class takes care about your MySQL database connections and queries
+ * The DigiDB class takes care about two database connections (localDB and mainDB) and creates queries 
  *
  * @author ugros
  *
  */
 public class DigiDB {
 
-    private Connection localDB;
-    final TableView table = new TableView();
+    private final Connection localDB;
+    private final Connection mainDB;
+    private final String LOCALHOST;
+    private final String LOCALSCHEMA;
+    private final String MAINHOST;
+    private final String MAINSCHEMA;
+    private final TableView table = new TableView();
     public ResultSet rs;
     ObservableList<String[]> dataRows = FXCollections.observableArrayList();
-
+    
     /**
-     * It returns with a connection
+     * It returns with a connection of localDB
      *
      * @return	Connection
      */
-    public Connection getConnect() {
+    public Connection getLocalDB() {
         return localDB;
     }
-
     
     /**
-     * Constructor for class, it opens a connection.
+     * It returns with a connection of mainDB
      *
-     * @param host	URL or hostname like for example 'localhost'
-     * @param database	database or schema name
-     * @param user	username to login
-     * @param password	password to login
+     * @return	Connection
      */
-    public DigiDB(String host, String database, String user, String password) {
-       
-        try {
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();                
-            localDB = DriverManager.getConnection(
-                      "jdbc:derby:" + database + ";create=true;" + "user=" + user + ";password=" + password);
-                    //"jdbc:derby:" + database + ";create=true;");
-            LOGGER.log(Level.INFO, "Connected to Derby database");
-        } catch (SQLException ex) {
-                LOGGER.log(Level.SEVERE, "SQL error: "+ex.getMessage());
-                System.exit(0);
-        } catch (InstantiationException ex) {
-                LOGGER.log(Level.SEVERE, "InstantiationException"+ex.getMessage());
-                System.exit(0);
-        } catch (IllegalAccessException ex) {
-                LOGGER.log(Level.SEVERE, "Illegal access: "+ex.getMessage());
-                USDialogs.error(language.getProperty("LOGINERROR"), ex.getMessage());
-                System.exit(0);
-        } catch (ClassNotFoundException ex) {
-                LOGGER.log(Level.SEVERE, "Class not found: "+ex.getMessage());
-                System.exit(0);
-        }
-
-
+    public Connection getMainDB() {
+        return mainDB;
     }
 
+    /**
+     * Constructor for class, it opens two connections 
+     * - connection one: local database
+     * - connection two: main database.
+     * @param user	username to main database
+     * @param password	password to main database
+     */
+    public DigiDB(String user, String password) {
+        
+        MAINHOST = config.getProperty("MAINHOST");
+        MAINSCHEMA = config.getProperty("MAINSCHEMA");        
+        mainDB= setMainDB(MAINHOST,MAINSCHEMA,user,password);
+        if (mainDB!=null) 
+            LOGGER.log(Level.INFO, "Connected to the main database"); 
+        else 
+            System.exit(0);
+        
+        LOCALHOST = config.getProperty("LOCALHOST");
+        LOCALSCHEMA = config.getProperty("LOCALSCHEMA");        
+        localDB= setLocalDB(LOCALHOST,LOCALSCHEMA);
+        if (localDB!=null) 
+            LOGGER.log(Level.INFO, "Connected to the local database"); 
+        else 
+            System.exit(0);
+    }
+    
+    
+        /** Settig up the localDB field
+     * @param host	URL or hostname like for example 'localhost'
+     * @param database	database or schema name
+     */
+    private Connection setMainDB(String host, String database, String user, String password) {       
+        try {
+            LOGGER.log(Level.INFO, "Trying to connect to main database."); 
+            Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();                
+            return DriverManager.getConnection("jdbc:derby://"+host+"/" + database + ";create=true;" + "user=" + user + ";password=" + password);
+        } catch (SQLException ex ) {
+                LOGGER.log(Level.SEVERE, "SQL error while setting up main database: </br>"+ex.getMessage());
+        } catch (InstantiationException ex) {
+                LOGGER.log(Level.SEVERE, "InstantiationException while setting up main database: </br>"+ex.getMessage());
+        } catch (IllegalAccessException ex) {
+                LOGGER.log(Level.SEVERE, "Illegal access while setting up main database: </br>"+ex.getMessage());
+                USDialogs.error(language.getProperty("LOGINERROR"), ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+                LOGGER.log(Level.SEVERE, "Class not found while setting up main database: </br>"+ex.getMessage());
+        }
+        return null;
+    }
+    
+    
+     /** Settig up the localDB field
+     * @param host	URL or hostname like for example 'localhost'
+     * @param database	database or schema name
+     */
+    private Connection setLocalDB(String host, String database) {       
+        try {
+            LOGGER.log(Level.INFO, "Trying to connect to local database.");
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();                
+            return DriverManager.getConnection("jdbc:derby:" + database + ";create=true;");      
+        } catch (SQLException ex ) {
+                LOGGER.log(Level.SEVERE, "SQL error while setting up local database: </br>"+ex.getMessage());
+        } catch (InstantiationException ex) {
+                LOGGER.log(Level.SEVERE, "InstantiationException  while setting up local database: </br>"+ex.getMessage());
+        } catch (IllegalAccessException ex) {
+                LOGGER.log(Level.SEVERE, "Illegal access while setting up local database: </br>"+ex.getMessage());
+                USDialogs.error(language.getProperty("LOGINERROR while setting up local database: </br>"), ex.getMessage());
+        } catch (ClassNotFoundException ex) {
+                LOGGER.log(Level.SEVERE, "Class not found while setting up local database: </br>"+ex.getMessage());
+        }
+        return null;
+    }
+
+  
     
     /**
      * This method closes the opened connection.
@@ -103,7 +157,6 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             return null;
         }
-        
     }
 
     

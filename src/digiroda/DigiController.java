@@ -216,7 +216,7 @@ public class DigiController implements Initializable {
         setLogger();      
         LOGGER.log(Level.INFO,"Program started normally.");
         
-        DigiUser user= new DigiUser();
+        DigiUser user= new DigiUser(null,null);
         if (user.getChecked()) {
             setMenuItems();
             setTableData();

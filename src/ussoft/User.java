@@ -25,8 +25,12 @@ public abstract class User {
         }
 	protected User(String userName, String password) {
 		initialize();
-                this.userName=userName;
-		this.password=password;	                
+                if (userName!=null) {
+                    if (!userName.equals("")) {
+                        this.userName=userName;
+                        this.password=password;
+                    }
+                }
 		if (checkUser()) {
 			checked=true;
 			rights=getRights();

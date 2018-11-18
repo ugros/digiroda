@@ -1,11 +1,11 @@
 package digiroda;
 
 import static digiroda.DigiController.LOGGER;
-import java.util.HashMap;
 import javafx.util.Pair;
 import ussoft.USDialogs;
 import static digiroda.DigiController.language;
 import static digiroda.DigiController.config;
+import java.util.HashSet;
 import java.util.logging.Level;
 
 public class DigiUser extends ussoft.User {
@@ -26,7 +26,13 @@ public class DigiUser extends ussoft.User {
             this.password = p.getValue().toString();
         }
         CONNECTS = new DigiDB(this.userName, this.password);
-       // LOGGER.log(Level.INFO, this.userName + " logged in.");        
+        this.checked=checkUser();
+        LOGGER.log(Level.INFO, this.userName + " logged in."); 
+        this.rights=getRights();
+    }
+    
+    public boolean checkRight(String right) {
+        return rights.contains(right);
     }
 
     @Override
@@ -35,27 +41,9 @@ public class DigiUser extends ussoft.User {
     }
 
     @Override
-    protected HashMap<String, Boolean> getRights() {
-        String sql = "select "
-                + "`right` "
-                + "from "
-                + "rights "
-                + "where "
-                + "rights.id in ("
-                + "select "
-                + "rightid "
-                + "from "
-                + "userrights "
-                + "where "
-                + "userid=(select id "
-                + "from users "
-                + "where username='" + this.userName + "'))";
-       /*getCONNECT().executeSqlToDataResult(sql);
-            //Logger.getLogger(DigiUser.class.getName()).log(Level.SEVERE, "Error while getting user " + userName + "'s rights");
-            LOGGER.log(Level.SEVERE,"Error while getting user " + userName + "'s rights"+"</br>"+ex.getLocalizedMessage());  
-            if (LOGGER.getLevel().equals(Level.FINEST)) LOGGER.log(Level.INFO,sql);
-        }  */
-        return null;
+    protected HashSet<String> getRights() {  
+        HashSet<String> s = CONNECTS.getUserRights(this.userName);
+        return s;
     }
 
     @Override

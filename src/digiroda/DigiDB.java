@@ -20,6 +20,10 @@ import ussoft.USDialogs;
 import static digiroda.DigiController.LOGGER;
 import static digiroda.DigiController.language;
 import static digiroda.DigiController.config;
+import java.sql.PreparedStatement;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * The DigiDB class takes care about two database connections (localDB and mainDB) and creates queries 
@@ -34,10 +38,11 @@ public class DigiDB {
     private final String LOCALHOST;
     private final String LOCALSCHEMA;
     private final String MAINHOST;
-    private final String MAINSCHEMA;
+    private final String MAINDB;
     private final TableView table = new TableView();
-    public ResultSet rs;
+    private ResultSet rs;
     ObservableList<String[]> dataRows = FXCollections.observableArrayList();
+    
     
     /**
      * It returns with a connection of localDB
@@ -67,12 +72,15 @@ public class DigiDB {
     public DigiDB(String user, String password) {
         
         MAINHOST = config.getProperty("MAINHOST");
-        MAINSCHEMA = config.getProperty("MAINSCHEMA");        
-        mainDB= setMainDB(MAINHOST,MAINSCHEMA,user,password);
+        MAINDB = config.getProperty("MAINDB");        
+        mainDB= setMainDB(MAINHOST,MAINDB,user,password);
         if (mainDB!=null) 
             LOGGER.log(Level.INFO, "Connected to the main database"); 
         else 
+        {
+            close();
             System.exit(0);
+        }
         
         LOCALHOST = config.getProperty("LOCALHOST");
         LOCALSCHEMA = config.getProperty("LOCALSCHEMA");        
@@ -80,26 +88,32 @@ public class DigiDB {
         if (localDB!=null) 
             LOGGER.log(Level.INFO, "Connected to the local database"); 
         else 
+        {
+            close();
             System.exit(0);
+        }
     }
     
     
-        /** Settig up the localDB field
+     /** Settig up the localDB field
      * @param host	URL or hostname like for example 'localhost'
      * @param database	database or schema name
      */
     private Connection setMainDB(String host, String database, String user, String password) {       
         try {
             LOGGER.log(Level.INFO, "Trying to connect to main database."); 
-            Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();                
-            return DriverManager.getConnection("jdbc:derby://"+host+"/" + database + ";create=true;" + "user=" + user + ";password=" + password);
+            //Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();                
+            //return DriverManager.getConnection("jdbc:derby://"+host+"/" + database + ";create=true;" + "user=" + user + ";password=" + password);
+            Class.forName("org.postgresql.Driver");
+            return DriverManager.getConnection("jdbc:postgresql://"+host+"/"+database, user, password);
+        
         } catch (SQLException ex ) {
                 LOGGER.log(Level.SEVERE, "SQL error while setting up main database: </br>"+ex.getMessage());
-        } catch (InstantiationException ex) {
+        /*} catch (InstantiationException ex) {
                 LOGGER.log(Level.SEVERE, "InstantiationException while setting up main database: </br>"+ex.getMessage());
         } catch (IllegalAccessException ex) {
                 LOGGER.log(Level.SEVERE, "Illegal access while setting up main database: </br>"+ex.getMessage());
-                USDialogs.error(language.getProperty("LOGINERROR"), ex.getMessage());
+                USDialogs.error(language.getProperty("LOGINERROR"), ex.getMessage());*/
         } catch (ClassNotFoundException ex) {
                 LOGGER.log(Level.SEVERE, "Class not found while setting up main database: </br>"+ex.getMessage());
         }
@@ -128,16 +142,25 @@ public class DigiDB {
         }
         return null;
     }
-
   
     
     /**
-     * This method closes the opened connection.
+     * This method closes the opened connections.
      *
-     * @throws SQLException
      */
-    public void close() throws SQLException {
-        localDB.close();
+    public void close(){
+        try {
+            if (mainDB!=null) mainDB.close();   
+            LOGGER.log(Level.INFO, "Connection to mainDB is closed.");
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+        try {     
+            if (localDB!=null) localDB.close();
+            LOGGER.log(Level.INFO, "Connection to localDB is closed.");
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
     }
 
     
@@ -147,7 +170,7 @@ public class DigiDB {
      * @param sql	String, which contains an sql query
      * @return	USDataResult - you can simply get columns and fields
      */
-    public USDataResult executeSqlToDataResult(String sql) {
+    private USDataResult executeSqlToDataResult(String sql) {
         try {
             Statement stmt;
             stmt = (Statement) localDB.createStatement();
@@ -163,10 +186,10 @@ public class DigiDB {
     /**
      * It executes a query and returns with the result, if it is;
      *
-     * @param sql	String, which contains an sql query
+     * @param sql String, which contains an sql query
      * @return	ResultSet
      */
-    public ResultSet executeSql(String sql) {
+    private ResultSet executeSql(String sql) {
         try {
             Statement stmt;
             stmt = (Statement) localDB.createStatement();
@@ -186,7 +209,7 @@ public class DigiDB {
      * @param sql	String, which contains an sql query
      * @return	javafx.scene.control.TableView - you can add it to a javafx root
      */
-    public TableView executeSqlToTable(String sql){
+    private TableView executeSqlToTable(String sql){
        return executeSqlToTable(sql, false);        
     }
 
@@ -200,7 +223,6 @@ public class DigiDB {
      * @return
      */
     private TableView executeSqlToTable(String sql, boolean editable){
-
         try {
             rs = executeSql(sql);
             USDataResult data = new USDataResult(rs);
@@ -219,6 +241,35 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, ex.getMessage());
         }
         return null;
+    }
+
+    /**
+     * It is a method for get a set of user's rights
+     * and returns with the result, if it is;
+     *
+     * @param   userName
+     * @return  Set<String> it consists all names of user's rights.
+     */
+    public HashSet<String> getUserRights(String userName) {
+        String sql = "select rightname from digiSCHEMA.rights where rights.id in ("
+                    + "select rightid from digiSCHEMA.userrights where userid=("
+                    + "select id from digiSCHEMA.users where username=?))";
+        //String sql = "select rightname from digiSCHEMA.rights where rights.id in (select rightid from digiSCHEMA.userrights where userid=(select id from digiSCHEMA.users where username='ugros'))";
+        HashSet<String> result = new HashSet<>();
+        try {      
+            PreparedStatement pst = null;
+            pst = mainDB.prepareStatement(sql);
+            pst.setString(1,userName);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {  
+                result.add(rs.getString(1));
+            }
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) LOGGER.log(Level.INFO,sql);
+            return null;
+        }          
     }
 
 }

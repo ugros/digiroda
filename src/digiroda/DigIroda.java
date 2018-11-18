@@ -2,6 +2,7 @@
 package digiroda;
 
 import static digiroda.DigiController.LOGGER;
+import static digiroda.DigiController.user;
 import java.util.logging.Level;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -28,6 +29,7 @@ public class DigIroda extends Application {
         launch(args);
       }
       finally {
+          if (user!=null) if (user.getConnects()!=null) user.getConnects().close();
           LOGGER.log(Level.INFO,"Program terminated.");
       }
     }

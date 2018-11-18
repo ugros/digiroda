@@ -4,6 +4,8 @@
 package ussoft;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author USSoft - 2018.
@@ -13,8 +15,8 @@ public abstract class User {
 	
 	protected String userName;
 	protected String password;
-	private HashMap<String,Boolean> rights= new HashMap<String,Boolean>();
-	private boolean checked=false;
+	protected Set<String> rights= new HashSet<>();
+	protected boolean checked=false;
 
 	protected User() {
             initialize();
@@ -38,7 +40,7 @@ public abstract class User {
 	}
 	
 	protected abstract boolean checkUser();
-	protected abstract HashMap<String,Boolean> getRights();
+	protected abstract Set<String> getRights();
         protected abstract void initialize();
 	
 	public String getUserName() {
@@ -46,7 +48,7 @@ public abstract class User {
 	}	
 
 	public boolean getRight(String right){
-		return rights.get(right);		
+		return rights.contains(right);		
 	}
         
         public boolean getChecked() {

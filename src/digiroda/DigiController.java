@@ -32,6 +32,7 @@ public class DigiController implements Initializable {
     static TreeItem<String> treeItem1, treeItem2, treeItem11, treeItem12;
     static Properties language = new Properties();
     static Properties config = new Properties();
+    static DigiUser user=null;
     public static Level loggerLevel; 						// This is for set up logging level. Use "normal" in "_logLevel" to set up normal level.
     final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 	// Logger is an API for logging what you/ want
     static String lg; 															// The logger's filename
@@ -216,12 +217,13 @@ public class DigiController implements Initializable {
         setLogger();      
         LOGGER.log(Level.INFO,"Program started normally.");
         
-        DigiUser user= new DigiUser(null,null);
+        user= new DigiUser(null,null);
         if (user.getChecked()) {
             setMenuItems();
             setTableData();
         } else {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
+           user.getConnects().close();
            System.exit(1);
         }
     }

@@ -6,6 +6,8 @@
 package digiroda;
 
 import static digiroda.DigiController.LOGGER;
+import static digiroda.DigiController.user;
+
 import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -34,6 +36,7 @@ class DigiListeners {
                             break;
                         case "Kilépés":   
                             LOGGER.log(Level.INFO,"Program terminated.");
+                            user.getConnects().close();
                             System.exit(0);
                             break;
                     }

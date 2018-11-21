@@ -45,11 +45,14 @@ public class USLogger extends Logger {
         }
 
         // logger.setLevel(Level.FINEST);
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         Date date = new Date();
-        fileName = "./LOG_" + dateFormat.format(date).toString() + ".html";
-        fileHTML = new FileHandler(fileName);
-
+        fileName = "./LOG/LOG_" + dateFormat.format(date).toString() + ".html";
+       
+        //fileHTML = new FileHandler(fileName);
+        fileHTML = new FileHandler(fileName,true);
+        
+        
         // create an HTML formatter
         formatterHTML = new USHtmlFormatter();
         fileHTML.setFormatter(formatterHTML);

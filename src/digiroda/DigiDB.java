@@ -16,14 +16,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import ussoft.USDataResult;
 import ussoft.USDialogs;
+import static digiroda.DigiController.user;
 
 import static digiroda.DigiController.LOGGER;
 import static digiroda.DigiController.language;
 import static digiroda.DigiController.config;
 import java.sql.PreparedStatement;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * The DigiDB class takes care about two database connections (localDB and mainDB) and creates queries 
@@ -192,7 +191,7 @@ public class DigiDB {
     private ResultSet executeSql(String sql) {
         try {
             Statement stmt;
-            stmt = (Statement) localDB.createStatement();
+            stmt = (Statement) mainDB.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             
             return rs;
@@ -212,7 +211,6 @@ public class DigiDB {
     private TableView executeSqlToTable(String sql){
        return executeSqlToTable(sql, false);        
     }
-
     
     /**
      * It is a private method for executeSqlToTable method, it executes a query
@@ -225,18 +223,27 @@ public class DigiDB {
     private TableView executeSqlToTable(String sql, boolean editable){
         try {
             rs = executeSql(sql);
-            USDataResult data = new USDataResult(rs);
-            table.setEditable(editable);
-            for (int i = 0; i < data.getNumOfColumns(); i++) {
-                TableColumn<List<Object>, Object> column = new TableColumn<>(data.getColumnName(i));
-                int columnIndex = i;
-                column.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().get(columnIndex)));
-                table.getColumns().add(column);
+            if (rs!=null) {
+                USDataResult data = new USDataResult(rs);
+                table.setEditable(editable);
+                for (int i = 0; i < data.getNumOfColumns(); i++) {
+                    TableColumn<List<Object>, Object> column = new TableColumn<>(data.getColumnName(i));
+                    int columnIndex = i;
+                    column.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().get(columnIndex)));
+                    table.getColumns().add(column);
+                }
+
+                table.getItems().setAll(data.getData());
+                table.setEditable(editable);                
+                return table;
             }
-            
-            table.getItems().setAll(data.getData());
-            table.setEditable(editable);
-            return table;
+            else 
+            {
+                if (LOGGER.getLevel().equals(Level.FINEST)) {                    
+                    LOGGER.log(Level.INFO,"The next query returned with empty result: </br>"+sql);
+                }
+                return null;
+            }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
         }
@@ -248,7 +255,7 @@ public class DigiDB {
      * and returns with the result, if it is;
      *
      * @param   userName
-     * @return  Set<String> it consists all names of user's rights.
+     * @return  Set<String> it contains all names of user's rights.
      */
     public HashSet<String> getUserRights(String userName) {
         String sql = "select rightname from digiSCHEMA.rights where rights.id in ("
@@ -271,5 +278,31 @@ public class DigiDB {
             return null;
         }          
     }
-
+    
+    /**
+     * It is a method for get a list of contacts
+     * and returns with the result in an editable TableView, if it is;
+     *
+     * @return  ObservableList<DigiContacts>: it contains all of contacts.
+     */
+    public ObservableList<DigiContacts> getContacts() {
+        String sql = "SELECT * FROM digischema.contactpersons;";
+        LOGGER.log(Level.FINE,"User "+user.getUserName()+" checked contacts.");
+        ResultSet rs= executeSql(sql); 
+        ObservableList<DigiContacts> oList=FXCollections.observableArrayList();
+        try {            
+            while (rs.next()) {
+                oList.add(new DigiContacts(
+                    rs.getString("familyname"),
+                    rs.getString("firstname"),
+                    rs.getString("phonenumber"),
+                    rs.getString("email")));
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, ex.toString());
+        }
+        
+        return oList;   
+         //return null;
+    }
 }

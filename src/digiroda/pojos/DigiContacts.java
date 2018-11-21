@@ -16,17 +16,20 @@ import javafx.beans.property.SimpleStringProperty;
         private SimpleStringProperty familyName;
         private SimpleStringProperty firstName;
         private SimpleStringProperty phoneNumber;
+        private SimpleStringProperty email;
 
         public DigiContacts() {
             this.familyName = new SimpleStringProperty("");
             this.firstName = new SimpleStringProperty("");
             this.phoneNumber = new SimpleStringProperty("");
+            this.email = new SimpleStringProperty("");
         }
 
-        public DigiContacts(String familyName, String firstName, String phoneNumber) {
+        public DigiContacts(String familyName, String firstName, String phoneNumber, String email) {
             this.familyName = new SimpleStringProperty(familyName);
             this.firstName = new SimpleStringProperty(firstName);
             this.phoneNumber = new SimpleStringProperty(phoneNumber);
+            this.email = new SimpleStringProperty(email);
         }
 
         public String getFamilyName() {
@@ -52,4 +55,14 @@ import javafx.beans.property.SimpleStringProperty;
         public void setPhoneNumber(String phoneNumber) {
             this.phoneNumber = new SimpleStringProperty(phoneNumber);
         }
+
+        public String getEmail() {
+            return email.getValue();
+        }
+        
+        public void setEmail(String email) {
+            this.email = new SimpleStringProperty(email);
+        }
+        
+        
     }

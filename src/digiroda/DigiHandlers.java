@@ -25,6 +25,15 @@ public class DigiHandlers {
         }; 
     }
     
+    public static EventHandler emailOnEditCommit(){
+        return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());                 
+            }
+        }; 
+    }
+    
     public static EventHandler firstNOnEditCommit(){
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override

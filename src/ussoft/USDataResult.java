@@ -15,7 +15,7 @@ public class USDataResult {
     private Integer nextRow=0;
     
     public HashMap<String,Object> nextRow() {
-        if (nextRow<getNumRows()) {
+        if (nextRow<getNumOfRows()) {
           HashMap<String,Object> r = new HashMap();
           for (int i=0;i<getNumOfColumns();i++)   {
               r.put(getColumnName(i),data.get(nextRow).get(i));             
@@ -27,7 +27,7 @@ public class USDataResult {
     }
     
     public HashMap<String,Object> getRow(int row) {
-        if (row<getNumRows()) {
+        if (row<getNumOfRows()) {
           HashMap<String,Object> r = new HashMap();
           for (int i=0;i<getNumOfColumns();i++)   {
               r.put(getColumnName(i),data.get(row).get(i));             
@@ -93,7 +93,7 @@ public class USDataResult {
         return columnNames.get(index);
     }
 
-    public int getNumRows() {
+    public int getNumOfRows() {
         return data.size();
     }
 
@@ -103,7 +103,7 @@ public class USDataResult {
 
     public Integer getColumnIndex(String columnName) {
         for (int i = 0; i < this.getNumOfColumns(); i++) {
-            if (columnNames.get(i).equals(columnName)) {
+            if (columnNames.get(i).toUpperCase().equals(columnName.toUpperCase())) {
                 return i;
             }
         }
@@ -111,7 +111,7 @@ public class USDataResult {
     }
 
     public Object getData(String columnName, int row) {
-        if (row < getNumRows()) {
+        if (row < getNumOfRows()) {
             return data.get(row).get(getColumnIndex(columnName));
         } else {
             return null;

@@ -8,7 +8,6 @@ import java.util.ResourceBundle;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
@@ -26,10 +25,11 @@ import javafx.scene.layout.StackPane;
 import ussoft.USDialogs;
 import ussoft.USLogger;
 
+
 public class DigiController implements Initializable {
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
-    static TreeItem<String> treeItem1, treeItem2, treeItem11, treeItem12;
+    static TreeItem<String> treeItem1, treeItem2, treeItem3, treeItem11, treeItem12;
     static Properties language = new Properties();
     static Properties config = new Properties();
     static DigiUser user=null;
@@ -66,6 +66,8 @@ public class DigiController implements Initializable {
     private String COLUMN_FIRSTNAME;
     private String COLUMN_FAMILYNAME;
     private String COLUMN_PHONENUMBER; 
+    private String COLUMN_EMAIL;
+    private String MENU_SETTINGS;
     //</editor-fold>
 
     
@@ -84,9 +86,12 @@ public class DigiController implements Initializable {
             MENU_EXPORT = language.getProperty("MENU_EXPORT");
             MENU_CONTACTS = language.getProperty("MENU_CONTACTS");
             MENU_LIST = language.getProperty("MENU_LIST");
+            MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
+            
             COLUMN_FIRSTNAME = language.getProperty("COLUMN_FIRSTNAME");
             COLUMN_FAMILYNAME = language.getProperty("COLUMN_FAMILYNAME");
             COLUMN_PHONENUMBER = language.getProperty("COLUMN_PHONENUMBER");
+            COLUMN_EMAIL = language.getProperty("COLUMN_EMAIL");
             
             input2 = loader.getResourceAsStream("resources/config.properties");           
             config.load(input2);
@@ -118,12 +123,16 @@ public class DigiController implements Initializable {
         TreeItem<String> rootItem = new TreeItem<>("Menü");
         TreeView<String> treeView = new TreeView<>(rootItem);
         treeView.setShowRoot(false);
-        treeItem1 = new TreeItem<>(MENU_CONTACTS);
-        treeItem2 = new TreeItem<>(MENU_QUIT);
-        treeItem11 = new TreeItem<>(MENU_LIST);
-        treeItem12 = new TreeItem<>(MENU_EXPORT);
-        treeItem1.getChildren().addAll(treeItem11, treeItem12);
-        rootItem.getChildren().addAll(treeItem1, treeItem2);
+        treeItem1 = new TreeItem<>(MENU_CONTACTS);        
+            treeItem11 = new TreeItem<>(MENU_LIST);
+            treeItem12 = new TreeItem<>(MENU_EXPORT);
+            treeItem1.getChildren().addAll(treeItem11, treeItem12);  
+            
+        treeItem2= new TreeItem<>(MENU_SETTINGS);
+        
+        treeItem3 = new TreeItem<>(MENU_QUIT);
+        
+        rootItem.getChildren().addAll(treeItem1, treeItem2, treeItem3);
         menuPane.getChildren().add(treeView);
         //</editor-fold>
 
@@ -133,14 +142,9 @@ public class DigiController implements Initializable {
     }
 
     private void setTableData() {
-        ObservableList<DigiContacts> tableList = FXCollections.observableArrayList(
-                new DigiContacts("Ugró", "Sándor", "0630xxxxx"),
-                new DigiContacts("Kiss", "Pesta", "0630xxxxx"),
-                new DigiContacts("Nagy", "Sándor", "0630xxxxx"),
-                new DigiContacts("Fejedelem", "Géza", "0630xxxxx"),
-                new DigiContacts("Király", "István", "0630xxxxx")
-        );
-        
+        //ObservableList<DigiContacts> tableList=FXCollections.observableArrayList();
+        ObservableList<DigiContacts> tableList=user.getConnects().getContacts();
+         
         TableColumn familyN = new TableColumn(COLUMN_FAMILYNAME);
         familyN.setMinWidth(150);
         familyN.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -158,8 +162,14 @@ public class DigiController implements Initializable {
         phoneN.setCellFactory(TextFieldTableCell.forTableColumn());
         phoneN.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         phoneN.setOnEditCommit(DigiHandlers.phoneNOnEditCommit());
+        
+        TableColumn email = new TableColumn(COLUMN_EMAIL);
+        email.setMinWidth(100);
+        email.setCellFactory(TextFieldTableCell.forTableColumn());
+        email.setCellValueFactory(new PropertyValueFactory<>("email"));
+        email.setOnEditCommit(DigiHandlers.emailOnEditCommit());
 
-        table.getColumns().addAll(familyN, firstN, phoneN);
+        table.getColumns().addAll(familyN, firstN, phoneN,email);
         table.setEditable(true);
 
         FilteredList<DigiContacts> filteredList = new FilteredList<>(tableList);
@@ -183,7 +193,10 @@ public class DigiController implements Initializable {
                 return false;
            });
        });*/
-        table.setItems(filteredList);       
+       
+       
+       table.setItems(filteredList);
+       
         
 
     }   
@@ -218,7 +231,7 @@ public class DigiController implements Initializable {
         LOGGER.log(Level.INFO,"Program started normally.");
         
         user= new DigiUser(null,null);
-        if (user.getChecked()) {
+        if (user.getChecked()) {            
             setMenuItems();
             setTableData();
         } else {

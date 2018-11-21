@@ -5,6 +5,7 @@
  */
 package ussoft;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -47,6 +48,13 @@ public class USLogger extends Logger {
         // logger.setLevel(Level.FINEST);
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         Date date = new Date();
+        
+        File directory = new File("./LOG");
+        if (! directory.exists()){
+            directory.mkdir();
+            // If you require it to make the entire directory path including parents,
+            // use directory.mkdirs(); here instead.
+        }
         fileName = "./LOG/LOG_" + dateFormat.format(date).toString() + ".html";
        
         //fileHTML = new FileHandler(fileName);

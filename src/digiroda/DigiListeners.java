@@ -5,6 +5,7 @@
  */
 package digiroda;
 
+import static digiroda.DigIroda.root;
 import static digiroda.DigiController.LOGGER;
 import static digiroda.DigiController.user;
 
@@ -12,13 +13,18 @@ import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
-
+import static digiroda.DigiController.lP;
+import static digiroda.DigiController.cP;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+//import static digiroda.DigiController.menuPane;
 /**
  *
  * @author ugros
  */
 class DigiListeners {
     
+   
     public static ChangeListener menuListener() {
         return new ChangeListener() {
                 @Override
@@ -31,8 +37,22 @@ class DigiListeners {
                         case "Exportálás":
                             System.out.println("Az exportálás menüpontot választottad");
                             break;
-                        case "Lista":
-                            System.out.println("A lista menüpontot választottad");
+                        case "Megmutat":
+                            //System.out.println("A lista menüpontot választottad");
+                            lP.setVisible(false);
+                            cP.setVisible(true); 
+                            //menuPane.setVisible(false) ;
+                            break;
+                        case "Naplók":
+                            
+                            
+                            WebView webView = new WebView();
+                            final WebEngine webEngine = webView.getEngine();
+                            webEngine.load("C:/xxx/L.html");
+                            
+                            lP.getChildren().add(webView);
+                            cP.setVisible(false); 
+                            lP.setVisible(true);  
                             break;
                         case "Kilépés":   
                             LOGGER.log(Level.INFO,"Program terminated.");

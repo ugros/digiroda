@@ -300,9 +300,7 @@ public class DigiDB {
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.toString());
-        }
-        
-        return oList;   
-         //return null;
+        }        
+        return oList;
     }
 }

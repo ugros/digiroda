@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -21,6 +22,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import ussoft.USDialogs;
 import ussoft.USLogger;
@@ -29,7 +32,7 @@ import ussoft.USLogger;
 public class DigiController implements Initializable {
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
-    static TreeItem<String> treeItem1, treeItem2, treeItem3, treeItem11, treeItem12;
+    static TreeItem<String> treeItem1, treeItem2, treeItem3, treeItem4, treeItem11, treeItem12;
     static Properties language = new Properties();
     static Properties config = new Properties();
     static DigiUser user=null;
@@ -40,6 +43,10 @@ public class DigiController implements Initializable {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="@FXML annotations">
+    @FXML
+    SplitPane contactsP;
+    @FXML
+    Pane logP;
     @FXML
     Label label;
     @FXML
@@ -53,9 +60,17 @@ public class DigiController implements Initializable {
     @FXML
     StackPane menuPane;
     @FXML
+    Pane dataPane;
+    @FXML
+    Pane contactsPane;
+    @FXML
+    SplitPane data2Pane;
+    @FXML
     TableView table;
     @FXML
     TextField filterText;
+    static SplitPane cP;
+    static Pane lP;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constants">
@@ -63,6 +78,7 @@ public class DigiController implements Initializable {
     private String MENU_EXPORT;
     private String MENU_CONTACTS;
     private String MENU_LIST;
+    private String MENU_LOGS;
     private String COLUMN_FIRSTNAME;
     private String COLUMN_FAMILYNAME;
     private String COLUMN_PHONENUMBER; 
@@ -86,6 +102,7 @@ public class DigiController implements Initializable {
             MENU_EXPORT = language.getProperty("MENU_EXPORT");
             MENU_CONTACTS = language.getProperty("MENU_CONTACTS");
             MENU_LIST = language.getProperty("MENU_LIST");
+            MENU_LOGS = language.getProperty("MENU_LOGS");
             MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
             
             COLUMN_FIRSTNAME = language.getProperty("COLUMN_FIRSTNAME");
@@ -118,7 +135,7 @@ public class DigiController implements Initializable {
     }
 
     private void setMenuItems() {
-
+        
         //<editor-fold defaultstate="collapsed" desc="Adding menu items">
         TreeItem<String> rootItem = new TreeItem<>("Menü");
         TreeView<String> treeView = new TreeView<>(rootItem);
@@ -130,15 +147,18 @@ public class DigiController implements Initializable {
             
         treeItem2= new TreeItem<>(MENU_SETTINGS);
         
-        treeItem3 = new TreeItem<>(MENU_QUIT);
+        treeItem3= new TreeItem<>(MENU_LOGS);
         
-        rootItem.getChildren().addAll(treeItem1, treeItem2, treeItem3);
+        treeItem4 = new TreeItem<>(MENU_QUIT);
+        
+        rootItem.getChildren().addAll(treeItem1, treeItem2, treeItem3, treeItem4);
         menuPane.getChildren().add(treeView);
         //</editor-fold>
 
         //<editor-fold defaultstate="collapsed" desc="Adding menu listener">
         treeView.getSelectionModel().selectedItemProperty().addListener(DigiListeners.menuListener());
         //</editor-fold>
+       
     }
 
     private void setTableData() {
@@ -196,9 +216,9 @@ public class DigiController implements Initializable {
        
        
        table.setItems(filteredList);
-       
-        
-
+       table.blendModeProperty();
+               
+       table.minWidthProperty().bind(contactsPane.widthProperty());
     }   
     
     private void setLogger() {
@@ -226,6 +246,10 @@ public class DigiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {  
         readProperties();
+        cP=new SplitPane();
+        lP=new Pane();
+        cP=contactsP;
+        lP=logP;
         
         setLogger();      
         LOGGER.log(Level.INFO,"Program started normally.");

@@ -1,3 +1,4 @@
+//<editor-fold defaultstate="collapsed" desc="license">
 /*
  * Copyright 2018 ugros.
  *
@@ -13,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+//</editor-fold>
 package digiroda;
 
 import static digiroda.DigiMenuListener.MENU_CONTACTS;
@@ -266,9 +267,6 @@ public class DigiController implements Initializable {
         
         logP=new StackPane();        
         logP=logPane;
-        logP.maxWidthProperty().bind(dataPane.widthProperty());
-        logP.minWidthProperty().bind(dataPane.widthProperty());
-        logP.centerShapeProperty().bind(dataPane.centerShapeProperty());
         
         setLogger();      
         LOGGER.log(Level.INFO,"Program started normally.");

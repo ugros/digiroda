@@ -1,8 +1,8 @@
 ----------------------------------------------------------------
-Sun Nov 25 19:00:58 CET 2018:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0167-4c08-1935-00000d239820 
+Sun Nov 25 21:26:16 CET 2018:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0167-4c8d-1dfa-00000d2798e0 
 on database directory C:\Users\ugros\Documents\NetBeansProjects\DigIroda\DigiDB with class loader sun.misc.Launcher$AppClassLoader@55f96302 
-Loaded from file:/C:/Users/ugros/Documents/NetBeansProjects/DigIroda/dist/run905877032/lib/derby.jar
+Loaded from file:/C:/Users/ugros/Documents/NetBeansProjects/DigIroda/dist/run1937844856/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=1.8.0_191-b12
 user.dir=C:\Users\ugros\Documents\NetBeansProjects\DigIroda

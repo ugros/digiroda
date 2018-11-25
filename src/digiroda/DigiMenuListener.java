@@ -1,3 +1,4 @@
+//<editor-fold defaultstate="collapsed" desc="license">
 /*
  * Copyright 2018 ugros.
  *
@@ -13,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+//</editor-fold>
 package digiroda;
 
 import static digiroda.DigiController.LOGGER;
@@ -44,7 +45,7 @@ class DigiMenuListener {
     final static String MENU_QUIT = language.getProperty("MENU_QUIT");
     final static String MENU_EXPORT = language.getProperty("MENU_EXPORT");
     final static String MENU_CONTACTS = language.getProperty("MENU_CONTACTS");
-    final static String MENU_SHOWCONTACTS = language.getProperty("MENU_LIST");
+    final static String MENU_SHOWCONTACTS = language.getProperty("MENU_SHOWCONTACTS");
     final static String MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
     //</editor-fold>
 
@@ -64,7 +65,7 @@ class DigiMenuListener {
                 //<editor-fold defaultstate="collapsed" desc="MENU_SHOWCONTACTS">
                 logP.setVisible(false);
                 contactsSplitP.setVisible(true);
-                LOGGER.log(Level.FINE, user.getUserName()+" checked contacts.");
+                LOGGER.log(Level.FINE, "User "+user.getUserName()+" checked contacts.");
                 //</editor-fold>
             } else if (selected.equals(MENU_SETTINGS)) {
                 //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
@@ -88,7 +89,7 @@ class DigiMenuListener {
                         logP.getChildren().add(webView);
                         logP.autosize();
                     }
-                    LOGGER.log(Level.FINE, user.getUserName()+" checked log file: "+ f.getAbsolutePath());
+                    LOGGER.log(Level.FINE, "User "+user.getUserName()+" checked log file: "+ f.getAbsolutePath());
                 } else LOGGER.log(Level.WARNING, user.getUserName()+" tried to check log files.");
                 //</editor-fold>
             } else if (selected.equals(MENU_QUIT)) {

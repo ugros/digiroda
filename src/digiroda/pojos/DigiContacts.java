@@ -1,3 +1,4 @@
+//<editor-fold defaultstate="collapsed" desc="license">
 /*
  * Copyright 2018 ugros.
  *
@@ -13,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//</editor-fold>
 package digiroda;
 
 import javafx.beans.property.SimpleStringProperty;

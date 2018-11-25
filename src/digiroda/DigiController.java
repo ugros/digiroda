@@ -1,5 +1,27 @@
+/*
+ * Copyright 2018 ugros.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package digiroda;
 
+import static digiroda.DigiMenuListener.MENU_CONTACTS;
+import static digiroda.DigiMenuListener.MENU_EXPORT;
+import static digiroda.DigiMenuListener.MENU_LOGS;
+import static digiroda.DigiMenuListener.MENU_QUIT;
+import static digiroda.DigiMenuListener.MENU_SETTINGS;
+import static digiroda.DigiMenuListener.MENU_SHOWCONTACTS;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -23,7 +45,6 @@ import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import ussoft.USDialogs;
 import ussoft.USLogger;
@@ -33,8 +54,8 @@ public class DigiController implements Initializable {
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
     static TreeItem<String> treeItem1, treeItem2, treeItem3, treeItem4, treeItem11, treeItem12;
-    static Properties language = new Properties();
-    static Properties config = new Properties();
+    final static Properties language = new Properties();
+    final static Properties config = new Properties();
     static DigiUser user=null;
     public static Level loggerLevel; 						// This is for set up logging level. Use "normal" in "_logLevel" to set up normal level.
     final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 	// Logger is an API for logging what you/ want
@@ -42,11 +63,23 @@ public class DigiController implements Initializable {
     public boolean isLogStored = false;
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="@FXML annotations">
+    //<editor-fold defaultstate="collapsed" desc="@FXML annotations">    
     @FXML
-    SplitPane contactsP;
+    AnchorPane root;
     @FXML
-    Pane logP;
+    SplitPane mainSplitPane;
+    @FXML
+    StackPane menuPane;
+    @FXML
+    StackPane dataPane;
+    @FXML
+    SplitPane contactsSplitPane;
+    @FXML
+    AnchorPane contactsDataPane;
+    @FXML
+    AnchorPane contactsAddPane;
+    @FXML
+    StackPane logPane;    
     @FXML
     Label label;
     @FXML
@@ -58,32 +91,18 @@ public class DigiController implements Initializable {
     @FXML
     Button addContactBtn;
     @FXML
-    StackPane menuPane;
-    @FXML
-    Pane dataPane;
-    @FXML
-    Pane contactsPane;
-    @FXML
-    SplitPane data2Pane;
-    @FXML
     TableView table;
     @FXML
     TextField filterText;
-    static SplitPane cP;
-    static Pane lP;
+    static SplitPane contactsSplitP;
+    static StackPane logP;
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constants">
-    private String MENU_QUIT;
-    private String MENU_EXPORT;
-    private String MENU_CONTACTS;
-    private String MENU_LIST;
-    private String MENU_LOGS;
+    //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
     private String COLUMN_FIRSTNAME;
     private String COLUMN_FAMILYNAME;
     private String COLUMN_PHONENUMBER; 
     private String COLUMN_EMAIL;
-    private String MENU_SETTINGS;
     //</editor-fold>
 
     
@@ -98,13 +117,7 @@ public class DigiController implements Initializable {
             //that folder should be added in "Project/Properties" menu to "Sources" and to "Libraries" too  
             input = loader.getResourceAsStream("resources/hungarian.lang.properties");           
             language.load(input);
-            MENU_QUIT = language.getProperty("MENU_QUIT");
-            MENU_EXPORT = language.getProperty("MENU_EXPORT");
-            MENU_CONTACTS = language.getProperty("MENU_CONTACTS");
-            MENU_LIST = language.getProperty("MENU_LIST");
-            MENU_LOGS = language.getProperty("MENU_LOGS");
-            MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
-            
+ 
             COLUMN_FIRSTNAME = language.getProperty("COLUMN_FIRSTNAME");
             COLUMN_FAMILYNAME = language.getProperty("COLUMN_FAMILYNAME");
             COLUMN_PHONENUMBER = language.getProperty("COLUMN_PHONENUMBER");
@@ -141,7 +154,7 @@ public class DigiController implements Initializable {
         TreeView<String> treeView = new TreeView<>(rootItem);
         treeView.setShowRoot(false);
         treeItem1 = new TreeItem<>(MENU_CONTACTS);        
-            treeItem11 = new TreeItem<>(MENU_LIST);
+            treeItem11 = new TreeItem<>(MENU_SHOWCONTACTS);
             treeItem12 = new TreeItem<>(MENU_EXPORT);
             treeItem1.getChildren().addAll(treeItem11, treeItem12);  
             
@@ -156,7 +169,7 @@ public class DigiController implements Initializable {
         //</editor-fold>
 
         //<editor-fold defaultstate="collapsed" desc="Adding menu listener">
-        treeView.getSelectionModel().selectedItemProperty().addListener(DigiListeners.menuListener());
+        treeView.getSelectionModel().selectedItemProperty().addListener(DigiMenuListener.menuListener());
         //</editor-fold>
        
     }
@@ -218,7 +231,8 @@ public class DigiController implements Initializable {
        table.setItems(filteredList);
        table.blendModeProperty();
                
-       table.minWidthProperty().bind(contactsPane.widthProperty());
+       table.minWidthProperty().bind(dataPane.widthProperty());
+       table.maxWidthProperty().bind(dataPane.widthProperty());
     }   
     
     private void setLogger() {
@@ -236,7 +250,7 @@ public class DigiController implements Initializable {
         LOGGER.setLevel(loggerLevel); 
                 
         try {
-            lg = USLogger.setup();
+            lg = USLogger.setup(config.getProperty("LOGDIR"));
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE,"Can't create log file "+lg);
             LOGGER.log(Level.FINEST,e.getLocalizedMessage());
@@ -246,10 +260,15 @@ public class DigiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {  
         readProperties();
-        cP=new SplitPane();
-        lP=new Pane();
-        cP=contactsP;
-        lP=logP;
+        
+        contactsSplitP=new SplitPane();
+        contactsSplitP=contactsSplitPane;
+        
+        logP=new StackPane();        
+        logP=logPane;
+        logP.maxWidthProperty().bind(dataPane.widthProperty());
+        logP.minWidthProperty().bind(dataPane.widthProperty());
+        logP.centerShapeProperty().bind(dataPane.centerShapeProperty());
         
         setLogger();      
         LOGGER.log(Level.INFO,"Program started normally.");

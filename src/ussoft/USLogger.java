@@ -17,7 +17,12 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 public class USLogger extends Logger {
-
+    
+    static File directory = new File("./LOG");
+    static private FileHandler fileHTML;
+    static private Formatter formatterHTML;
+    static private String fileName;
+    
     protected USLogger(String name, String resourceBundleName) {
         super(name, resourceBundleName);
         // TODO Auto-generated constructor stub
@@ -29,10 +34,12 @@ public class USLogger extends Logger {
         }
     }
 
-    static private FileHandler fileHTML;
-    static private Formatter formatterHTML;
-    static private String fileName;
-
+   
+    static public String setup(String logDirectory) throws IOException {
+        directory=new File(logDirectory);
+        return setup();        
+    }
+    
     static public String setup() throws IOException {
 
         // get the global logger to configure it
@@ -49,13 +56,13 @@ public class USLogger extends Logger {
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         Date date = new Date();
         
-        File directory = new File("./LOG");
+        
         if (! directory.exists()){
             directory.mkdir();
             // If you require it to make the entire directory path including parents,
             // use directory.mkdirs(); here instead.
         }
-        fileName = "./LOG/LOG_" + dateFormat.format(date).toString() + ".html";
+        fileName = directory+"/LOG_" + dateFormat.format(date).toString() + ".html";
        
         //fileHTML = new FileHandler(fileName);
         fileHTML = new FileHandler(fileName,true);

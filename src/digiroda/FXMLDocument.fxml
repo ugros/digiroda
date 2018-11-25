@@ -5,51 +5,61 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" fx:id="root" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="digiroda.DigiController">
+<!-- minHeight="-Infinity" minWidth="-Infinity" -->
+
+<AnchorPane id="root" fx:id="root" prefHeight="650.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="digiroda.DigiController">
     <children>
-      <SplitPane dividerPositions="0.2" layoutX="51.0" prefHeight="650.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <items>
-            <StackPane id="menuPane" fx:id="menuPane" maxHeight="1.7976931348623157E308" maxWidth="187.0" minWidth="150.0" prefHeight="629.0" prefWidth="150.0" />
-            <SplitPane id="contactsP" fx:id="contactsP" dividerPositions="0.5" orientation="VERTICAL" prefHeight="656.0" prefWidth="444.0">
-              <items>
-                <AnchorPane id="contactsPane" fx:id="contactsPane" prefHeight="504.0" prefWidth="444.0">
-                     <children>
-                        <Label layoutX="14.0" layoutY="41.0" prefHeight="17.0" prefWidth="57.0" text="Szűrő:" />
-                        <TextField id="filterText" fx:id="filterText" layoutX="71.0" layoutY="37.0" prefHeight="25.0" prefWidth="350.0" />
-                        <TableView id="table" fx:id="table" layoutY="69.0" prefHeight="423.0" prefWidth="444.0">                     
-                          <placeholder>
-                              <Label layoutX="35.0" layoutY="461.0" text="Nincs adat" />
-                          </placeholder>                           
-                        </TableView>
-                          <Label fx:id="label" alignment="CENTER" contentDisplay="CENTER" layoutX="101.0" layoutY="4.0" minHeight="16" minWidth="69" prefHeight="37.0" prefWidth="200.0" text="Telefonkönyv" textAlignment="JUSTIFY" textFill="#6f0d0d">
-                           <font>
-                              <Font name="Mongolian Baiti" size="18.0" />
-                           </font>
-                        </Label>
-                     </children>
-                  </AnchorPane>
-                  <AnchorPane maxHeight="150.0" minHeight="150.0" prefHeight="150.0">
-                     <children>
-                        <Button id="addContactBtn" fx:id="addContactBtn" layoutX="314.0" layoutY="74.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="130.0" text="Hozzáadás" />
-                        <TextField id="phoneNumber" fx:id="phoneNumber" layoutX="118.0" layoutY="23.0" />
-                        <Label layoutX="29.0" layoutY="78.0" text="Telefon" />
-                        <Label layoutX="29.0" layoutY="53.0" text="Keresztnév" />
-                        <Label layoutX="27.0" layoutY="27.0" text="Vezetéknév" />
-                        <TextField id="familyName" fx:id="familyName" layoutX="118.0" layoutY="49.0" />
-                        <TextField id="firstName" fx:id="firstName" layoutX="118.0" layoutY="74.0" />
-                     </children>
-                  </AnchorPane>
-              </items>
-            </SplitPane>
-            <StackPane id="logP" fx:id="logP" prefHeight="200.0" prefWidth="200.0">
+        <SplitPane id="mainSplitPane" fx:id="mainSplitPane" dividerPositions="0.2" layoutX="51.0" prefHeight="650.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <items>
+                <StackPane id="menuPane" fx:id="menuPane" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" />
+                <StackPane id="dataPane" fx:id="dataPane" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="650.0">
+                    <SplitPane id="contactsSplitPane" fx:id="contactsSplitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="504.0" prefWidth="444.0">
+                        <items>
+                            <AnchorPane id="contactsDataPane" fx:id="contactsDataPane">
+                                <children>
+                                    <Label layoutX="14.0" layoutY="41.0" prefHeight="17.0" prefWidth="57.0" text="Szűrő:" />
+                                    <TextField id="filterText" fx:id="filterText" layoutX="71.0" layoutY="37.0" prefHeight="25.0" prefWidth="350.0" />
+                                    <TableView id="table" fx:id="table" layoutY="69.0" prefHeight="423.0" prefWidth="444.0">                     
+                                        <placeholder>
+                                            <Label layoutX="35.0" layoutY="461.0" text="Nincs adat" />
+                                        </placeholder>                           
+                                    </TableView>
+                                    <Label fx:id="label" alignment="CENTER" contentDisplay="CENTER" layoutX="101.0" layoutY="4.0" minHeight="16" minWidth="69" prefHeight="37.0" prefWidth="200.0" text="Telefonkönyv" textAlignment="JUSTIFY" textFill="#6f0d0d">
+                                        <font>
+                                            <Font name="Mongolian Baiti" size="18.0" />
+                                        </font>
+                                    </Label>
+                                </children>
+                            </AnchorPane>
+                 
+                            <AnchorPane id="contactsAddPane" fx:id="contactsAddPane" maxHeight="150.0" minHeight="150.0" prefHeight="150.0">
+                                <children>
+                                    <Button id="addContactBtn" fx:id="addContactBtn" layoutX="314.0" layoutY="74.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="130.0" text="Hozzáadás" />
+                                    <TextField id="phoneNumber" fx:id="phoneNumber" layoutX="118.0" layoutY="23.0" />
+                                    <Label layoutX="29.0" layoutY="78.0" text="Telefon" />
+                                    <Label layoutX="29.0" layoutY="53.0" text="Keresztnév" />
+                                    <Label layoutX="27.0" layoutY="27.0" text="Vezetéknév" />
+                                    <TextField id="familyName" fx:id="familyName" layoutX="118.0" layoutY="49.0" />
+                                    <TextField id="firstName" fx:id="firstName" layoutX="118.0" layoutY="74.0" />
+                                </children>
+                            </AnchorPane>
+                        </items>
+                    </SplitPane>
+
+                    <StackPane id="logPane" fx:id="logPane" prefWidth="650.0">
                
-            </StackPane>
-         </items>
-      </SplitPane>
+                    </StackPane>
+               <effect>
+                  <Blend />
+               </effect>
+                </StackPane>
+            
+            </items>
+        </SplitPane>
     </children>
 </AnchorPane>

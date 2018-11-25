@@ -1,3 +1,3 @@
 # digiroda
 
-Don't download this project bacause it is under constructing.
+Don't download this project because it is under constructing.

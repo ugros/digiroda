@@ -18,6 +18,7 @@
 
 package digiroda;
 
+import static digiroda.DigiController.user;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 
@@ -30,8 +31,10 @@ public class DigiHandlers {
     public static EventHandler familyNOnEditCommit(){
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override
-            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
-                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setFamilyName(t.getNewValue());                 
+            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {                
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setFamilyName(t.getNewValue());                
+                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setFamilyNameOfContact(id, t.getNewValue());
             }
         }; 
     }
@@ -40,7 +43,9 @@ public class DigiHandlers {
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
-                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());                 
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());  
+                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setEmailOfContact(id, t.getNewValue());
             }
         }; 
     }
@@ -49,7 +54,9 @@ public class DigiHandlers {
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
-                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setFirstName(t.getNewValue());                 
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setFirstName(t.getNewValue());  
+                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setFirstNameOfContact(id, t.getNewValue());
             }
         };  
     }
@@ -58,7 +65,9 @@ public class DigiHandlers {
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
-               ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setPhoneNumber(t.getNewValue());                 
+               ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setPhoneNumber(t.getNewValue()); 
+               int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setPhoneNumberOfContact(id, t.getNewValue());
             }
         };   
     }

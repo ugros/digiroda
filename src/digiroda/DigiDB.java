@@ -311,6 +311,7 @@ public class DigiDB {
         try {            
             while (rs.next()) {
                 oList.add(new DigiContacts(
+                    rs.getInt("id"),
                     rs.getString("familyname"),
                     rs.getString("firstname"),
                     rs.getString("phonenumber"),
@@ -320,5 +321,81 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, ex.toString());
         }        
         return oList;
+    }
+    
+    /**
+     * Set familyname of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setFamilyNameOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET familyname =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed familyname of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change familyname of contact: "+id+"</br>"+ex.getMessage());
+        }
+    }
+    
+    /**
+     * Set firstname of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setFirstNameOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET firstname =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed firstname of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change firstname of contact: "+id+"</br>"+ex.getMessage());
+        }
+    }
+    
+     /**
+     * Set phonenumber of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setPhoneNumberOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET phonenumber =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed phonenumber of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change phonenumber of contact: "+id+"</br>"+ex.getMessage());
+        }
+    }
+    
+     /**
+     * Set email of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setEmailOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET email =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed email of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change email of contact: "+id+"</br>"+ex.getMessage());
+        }
     }
 }

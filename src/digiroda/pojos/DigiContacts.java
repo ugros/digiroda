@@ -29,19 +29,34 @@ import javafx.beans.property.SimpleStringProperty;
         private SimpleStringProperty firstName;
         private SimpleStringProperty phoneNumber;
         private SimpleStringProperty email;
+        private int id;
 
         public DigiContacts() {
             this.familyName = new SimpleStringProperty("");
             this.firstName = new SimpleStringProperty("");
             this.phoneNumber = new SimpleStringProperty("");
             this.email = new SimpleStringProperty("");
+            this.id=0;
         }
 
         public DigiContacts(String familyName, String firstName, String phoneNumber, String email) {
             this.familyName = new SimpleStringProperty(familyName);
             this.firstName = new SimpleStringProperty(firstName);
             this.phoneNumber = new SimpleStringProperty(phoneNumber);
-            this.email = new SimpleStringProperty(email);
+            this.email = new SimpleStringProperty(email);   
+            this.id=0;
+        }
+        
+        public DigiContacts(int id, String familyName, String firstName, String phoneNumber, String email) {
+            this.familyName = new SimpleStringProperty(familyName);
+            this.firstName = new SimpleStringProperty(firstName);
+            this.phoneNumber = new SimpleStringProperty(phoneNumber);
+            this.email = new SimpleStringProperty(email);  
+            this.id=id;
+        }
+        
+        public int getId() {
+            return this.id;
         }
 
         public String getFamilyName() {

@@ -17,6 +17,7 @@
 //</editor-fold>
 package digiroda;
 
+import static digiroda.DigiMenuListener.MENU;
 import static digiroda.DigiMenuListener.MENU_CONTACTS;
 import static digiroda.DigiMenuListener.MENU_EXPORT;
 import static digiroda.DigiMenuListener.MENU_LOGS;
@@ -30,20 +31,15 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import ussoft.USDialogs;
@@ -84,10 +80,13 @@ public class DigiController implements Initializable {
     TextField filterText;
     static SplitPane contactsSplitP;
     static StackPane logP;
+    static TableView contactsTable;
+    static StackPane dataP;
+    static TextField filterT;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
-    static TreeItem<String> treeItem1, treeItem2, treeItem3, treeItem4, treeItem11, treeItem12;
+    static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem11, treeItem12;
     final static Properties language = new Properties();
     final static Properties config = new Properties();
     static DigiUser user=null;
@@ -96,14 +95,6 @@ public class DigiController implements Initializable {
     static String lg; 															// The logger's filename
     public boolean isLogStored = false;
     //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
-    private String COLUMN_FIRSTNAME;
-    private String COLUMN_FAMILYNAME;
-    private String COLUMN_PHONENUMBER; 
-    private String COLUMN_EMAIL;
-    //</editor-fold>
-
     
     public void readProperties() {
         
@@ -117,10 +108,7 @@ public class DigiController implements Initializable {
             input = loader.getResourceAsStream("resources/hungarian.lang.properties");           
             language.load(input);
  
-            COLUMN_FIRSTNAME = language.getProperty("COLUMN_FIRSTNAME");
-            COLUMN_FAMILYNAME = language.getProperty("COLUMN_FAMILYNAME");
-            COLUMN_PHONENUMBER = language.getProperty("COLUMN_PHONENUMBER");
-            COLUMN_EMAIL = language.getProperty("COLUMN_EMAIL");
+
             
             input2 = loader.getResourceAsStream("resources/config.properties");           
             config.load(input2);
@@ -149,9 +137,9 @@ public class DigiController implements Initializable {
     private void setMenuItems() {
         
         //<editor-fold defaultstate="collapsed" desc="Adding menu items">
-        TreeItem<String> rootItem = new TreeItem<>("Menü");
+        rootItem = new TreeItem<>(MENU);
         TreeView<String> treeView = new TreeView<>(rootItem);
-        treeView.setShowRoot(false);
+        treeView.setShowRoot(true);
         treeItem1 = new TreeItem<>(MENU_CONTACTS);        
             treeItem11 = new TreeItem<>(MENU_SHOWCONTACTS);
             treeItem12 = new TreeItem<>(MENU_EXPORT);
@@ -173,62 +161,24 @@ public class DigiController implements Initializable {
        
     }
 
-    private void setTableData() {
-        //ObservableList<DigiContacts> tableList=FXCollections.observableArrayList();
-        ObservableList<DigiContacts> tableList=user.getConnects().getContacts();
-         
-        TableColumn familyN = new TableColumn(COLUMN_FAMILYNAME);
-        familyN.setMinWidth(150);
-        familyN.setCellFactory(TextFieldTableCell.forTableColumn());
-        familyN.setCellValueFactory(new PropertyValueFactory<>("familyName"));
-        familyN.setOnEditCommit(DigiHandlers.familyNOnEditCommit());
-
-        TableColumn firstN = new TableColumn(COLUMN_FIRSTNAME);
-        firstN.setMinWidth(150);
-        firstN.setCellFactory(TextFieldTableCell.forTableColumn());
-        firstN.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        firstN.setOnEditCommit(DigiHandlers.firstNOnEditCommit());
-
-        TableColumn phoneN = new TableColumn(COLUMN_PHONENUMBER);
-        phoneN.setMinWidth(100);
-        phoneN.setCellFactory(TextFieldTableCell.forTableColumn());
-        phoneN.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
-        phoneN.setOnEditCommit(DigiHandlers.phoneNOnEditCommit());
+    private void setFXML() {
+                
+        contactsSplitP=new SplitPane();
+        contactsSplitP=contactsSplitPane;
         
-        TableColumn email = new TableColumn(COLUMN_EMAIL);
-        email.setMinWidth(100);
-        email.setCellFactory(TextFieldTableCell.forTableColumn());
-        email.setCellValueFactory(new PropertyValueFactory<>("email"));
-        email.setOnEditCommit(DigiHandlers.emailOnEditCommit());
-
-        table.getColumns().addAll(familyN, firstN, phoneN,email);
-        table.setEditable(true);
-
-        FilteredList<DigiContacts> filteredList = new FilteredList<>(tableList);
-     /*   filterText.textProperty().addListener((observable, oldValue, newValue) -> {
-        filteredList.setPredicate(
-            new Predicate<DigiContacts>(){
-                public boolean test(DigiContacts t){
-                    if (t.getFamilyName().toUpperCase().contains(filterText.getText().toUpperCase())
-                        || t.getFirstName().toUpperCase().contains(filterText.getText().toUpperCase())    
-                            ) 
-                        return true;
-                    else 
-                        return false;
-                }});});*/
-       filterText.textProperty().addListener((observable, oldValue, newValue) -> {
-           filteredList.setPredicate( t->  
-           {   return t.getFamilyName().toUpperCase().contains(filterText.getText().toUpperCase())
-                   || t.getFirstName().toUpperCase().contains(filterText.getText().toUpperCase());
-           });
-       });
-       
-       
-       table.setItems(filteredList);
-       table.blendModeProperty();
-               
-       table.minWidthProperty().bind(dataPane.widthProperty());
-       table.maxWidthProperty().bind(dataPane.widthProperty());
+        logP=new StackPane();        
+        logP=logPane;
+        
+        contactsTable=new TableView();
+        contactsTable=table;
+        
+        dataP=new StackPane();
+        dataP=dataPane;
+        
+        filterT=new TextField();
+        filterT=filterText;
+        
+        
     }   
     
     private void setLogger() {
@@ -257,19 +207,13 @@ public class DigiController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {  
         readProperties();
         
-        contactsSplitP=new SplitPane();
-        contactsSplitP=contactsSplitPane;
-        
-        logP=new StackPane();        
-        logP=logPane;
-        
         setLogger();      
         LOGGER.log(Level.INFO,"Program started normally.");
         
         user= new DigiUser(null,null);
         if (user.getChecked()) {            
             setMenuItems();
-            setTableData();
+            setFXML();
         } else {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
            user.getConnects().close();

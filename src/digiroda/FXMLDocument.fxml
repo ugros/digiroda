@@ -12,13 +12,13 @@
 
 <!-- minHeight="-Infinity" minWidth="-Infinity" -->
 
-<AnchorPane id="root" fx:id="root" prefHeight="650.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="digiroda.DigiController">
+<AnchorPane id="root" fx:id="root" prefHeight="650.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="digiroda.DigiController">
     <children>
         <SplitPane id="mainSplitPane" fx:id="mainSplitPane" dividerPositions="0.2" layoutX="51.0" prefHeight="650.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
                 <StackPane id="menuPane" fx:id="menuPane" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" />
                 <StackPane id="dataPane" fx:id="dataPane" alignment="TOP_LEFT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="650.0">
-                    <SplitPane id="contactsSplitPane" fx:id="contactsSplitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="504.0" prefWidth="444.0">
+                    <SplitPane id="contactsSplitPane" fx:id="contactsSplitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="504.0" prefWidth="444.0" visible="false">
                         <items>
                             <AnchorPane id="contactsDataPane" fx:id="contactsDataPane">
                                 <children>

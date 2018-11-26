@@ -50,19 +50,7 @@ import javafx.scene.layout.StackPane;
 import ussoft.USDialogs;
 import ussoft.USLogger;
 
-
 public class DigiController implements Initializable {
-
-    //<editor-fold defaultstate="collapsed" desc="Field's declarations">
-    static TreeItem<String> treeItem1, treeItem2, treeItem3, treeItem4, treeItem11, treeItem12;
-    final static Properties language = new Properties();
-    final static Properties config = new Properties();
-    static DigiUser user=null;
-    public static Level loggerLevel; 						// This is for set up logging level. Use "normal" in "_logLevel" to set up normal level.
-    final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 	// Logger is an API for logging what you/ want
-    static String lg; 															// The logger's filename
-    public boolean isLogStored = false;
-    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="@FXML annotations">    
     @FXML
@@ -97,6 +85,17 @@ public class DigiController implements Initializable {
     TextField filterText;
     static SplitPane contactsSplitP;
     static StackPane logP;
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Field's declarations">
+    static TreeItem<String> treeItem1, treeItem2, treeItem3, treeItem4, treeItem11, treeItem12;
+    final static Properties language = new Properties();
+    final static Properties config = new Properties();
+    static DigiUser user=null;
+    public static Level loggerLevel; 						// This is for set up logging level. Use "normal" in "_logLevel" to set up normal level.
+    final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 	// Logger is an API for logging what you/ want
+    static String lg; 															// The logger's filename
+    public boolean isLogStored = false;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
@@ -207,7 +206,7 @@ public class DigiController implements Initializable {
         table.setEditable(true);
 
         FilteredList<DigiContacts> filteredList = new FilteredList<>(tableList);
-        filterText.textProperty().addListener((observable, oldValue, newValue) -> {
+     /*   filterText.textProperty().addListener((observable, oldValue, newValue) -> {
         filteredList.setPredicate(
             new Predicate<DigiContacts>(){
                 public boolean test(DigiContacts t){
@@ -217,16 +216,13 @@ public class DigiController implements Initializable {
                         return true;
                     else 
                         return false;
-                }});});
-       /*filterText.textProperty().addListener((observable, oldValue, newValue) -> {
+                }});});*/
+       filterText.textProperty().addListener((observable, oldValue, newValue) -> {
            filteredList.setPredicate( t->  
-           { if (   t.getFamilyName().toUpperCase().contains(filterText.getText().toUpperCase())
-                 || t.getFirstName().toUpperCase().contains(filterText.getText().toUpperCase()) ) 
-                return true;
-            else 
-                return false;
+           {   return t.getFamilyName().toUpperCase().contains(filterText.getText().toUpperCase())
+                   || t.getFirstName().toUpperCase().contains(filterText.getText().toUpperCase());
            });
-       });*/
+       });
        
        
        table.setItems(filteredList);

@@ -45,7 +45,7 @@ public class DigiUser extends ussoft.User {
         }
         CONNECTS = new DigiDB(this.userName, this.password);
         this.checked=checkUser();
-        LOGGER.log(Level.INFO, this.userName + " logged in."); 
+        LOGGER.log(Level.INFO, "User "+this.userName + " logged in."); 
         this.rights=getRights();
     }
     

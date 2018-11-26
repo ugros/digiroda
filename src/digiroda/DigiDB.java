@@ -92,7 +92,7 @@ public class DigiDB {
         MAINDB = config.getProperty("MAINDB");        
         mainDB= setMainDB(MAINHOST,MAINDB,user,password);
         if (mainDB!=null) 
-            LOGGER.log(Level.INFO, "Connected to the main database"); 
+            LOGGER.log(Level.FINE, "Connected to the main database"); 
         else 
         {
             close();
@@ -103,7 +103,7 @@ public class DigiDB {
         LOCALSCHEMA = config.getProperty("LOCALSCHEMA");        
         localDB= setLocalDB(LOCALHOST,LOCALSCHEMA);
         if (localDB!=null) 
-            LOGGER.log(Level.INFO, "Connected to the local database"); 
+            LOGGER.log(Level.FINE, "Connected to the local database"); 
         else 
         {
             close();
@@ -118,7 +118,7 @@ public class DigiDB {
      */
     private Connection setMainDB(String host, String database, String user, String password) {       
         try {
-            LOGGER.log(Level.INFO, "Trying to connect to main database."); 
+            LOGGER.log(Level.FINE, "Trying to connect to main database."); 
             //Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();                
             //return DriverManager.getConnection("jdbc:derby://"+host+"/" + database + ";create=true;" + "user=" + user + ";password=" + password);
             Class.forName("org.postgresql.Driver");
@@ -144,7 +144,7 @@ public class DigiDB {
      */
     private Connection setLocalDB(String host, String database) {       
         try {
-            LOGGER.log(Level.INFO, "Trying to connect to local database.");
+            LOGGER.log(Level.FINE, "Trying to connect to local database.");
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();                
             return DriverManager.getConnection("jdbc:derby:" + database + ";create=true;");      
         } catch (SQLException ex ) {
@@ -168,13 +168,13 @@ public class DigiDB {
     public void close(){
         try {
             if (mainDB!=null) mainDB.close();   
-            LOGGER.log(Level.INFO, "Connection to mainDB is closed.");
+            LOGGER.log(Level.FINE, "Connection to mainDB is closed.");
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
         try {     
             if (localDB!=null) localDB.close();
-            LOGGER.log(Level.INFO, "Connection to localDB is closed.");
+            LOGGER.log(Level.FINE, "Connection to localDB is closed.");
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }

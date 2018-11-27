@@ -18,9 +18,11 @@
 
 package digiroda;
 
+import static digiroda.DigiController.language;
 import static digiroda.DigiController.user;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
+import ussoft.USDialogs;
 
 /**
  *
@@ -32,31 +34,73 @@ public class DigiHandlers {
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {                
-                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setFamilyName(t.getNewValue());                
-                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
-                user.getConnects().setFamilyNameOfContact(id, t.getNewValue());
+                USDialogs.warning(language.getProperty("TITLE_NOTUSED"), language.getProperty("TEXT_NOTUSED"));
             }
         }; 
     }
     
-    public static EventHandler emailOnEditCommit(){
+    public static EventHandler  companyNOnEditCommit() {
+         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
+                USDialogs.warning(language.getProperty("TITLE_NOTUSED"), language.getProperty("TEXT_NOTUSED"));
+            }
+        }; 
+    }
+    
+    public static EventHandler  countryOnEditCommit() {
+         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());  
+                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setCountryOfContact(id, t.getNewValue());
+            }
+        }; 
+    }
+        
+    public static EventHandler cityOnEditCommit(){
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
                 ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());  
                 int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
-                user.getConnects().setEmailOfContact(id, t.getNewValue());
+                user.getConnects().setCityOfContact(id, t.getNewValue());
             }
         }; 
     }
+            
+    public static EventHandler postalCOnEditCommit(){
+        return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());  
+                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setPostalCOfContact(id, t.getNewValue());
+            }
+        }; 
+    }
+    
+    public static EventHandler adressOnEditCommit(){
+        return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());  
+                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setAdressOfContact(id, t.getNewValue());
+            }
+        }; 
+    }
+        
+    
+    //*********************************************************************************
+
     
     public static EventHandler firstNOnEditCommit(){
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
-                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setFirstName(t.getNewValue());  
-                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
-                user.getConnects().setFirstNameOfContact(id, t.getNewValue());
+                USDialogs.warning(language.getProperty("TITLE_NOTUSED"), language.getProperty("TEXT_NOTUSED"));
             }
         };  
     }
@@ -70,6 +114,17 @@ public class DigiHandlers {
                 user.getConnects().setPhoneNumberOfContact(id, t.getNewValue());
             }
         };   
+    }
+    
+    public static EventHandler emailOnEditCommit(){
+        return new EventHandler<TableColumn.CellEditEvent<DigiContacts,String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {
+                ((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).setEmail(t.getNewValue());  
+                int id=((DigiContacts) t.getTableView().getItems().get(t.getTablePosition().getRow())).getId();
+                user.getConnects().setEmailOfContact(id, t.getNewValue());
+            }
+        }; 
     }
     
 }

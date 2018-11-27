@@ -304,7 +304,7 @@ public class DigiDB {
      * @return  ObservableList<DigiContacts>: it contains all of contacts.
      */
     public ObservableList<DigiContacts> getContacts() {
-        String sql = "SELECT * FROM digischema.contactpersons;";
+        String sql = "SELECT contactpersons.id, company, contactpersons.familyname, contactpersons.firstname, contactpersons.phonenumber, contactpersons.email, contactpersons.country, contactpersons.city, contactpersons.postalcode, contactpersons.adress FROM digischema.companies, digischema.contactpersons where contactpersons.companyid=companies.id;";
         LOGGER.log(Level.FINE,"User "+user.getUserName()+" checked contacts.");
         ResultSet rs= executeSql(sql); 
         ObservableList<DigiContacts> oList=FXCollections.observableArrayList();
@@ -312,10 +312,16 @@ public class DigiDB {
             while (rs.next()) {
                 oList.add(new DigiContacts(
                     rs.getInt("id"),
+                    rs.getString("company"),
                     rs.getString("familyname"),
                     rs.getString("firstname"),
                     rs.getString("phonenumber"),
-                    rs.getString("email")));
+                    rs.getString("email"),
+                    rs.getString("country"),
+                    rs.getString("city"),
+                    rs.getString("postalcode"),
+                    rs.getString("adress")
+                            ));
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.toString());
@@ -341,6 +347,62 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change familyname of contact: "+id+"</br>"+ex.getMessage());
         }
     }
+/**
+     * Set city of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setCityOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET city =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed city of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change city of contact: "+id+"</br>"+ex.getMessage());
+        }
+    }
+    
+    /**
+     * Set country of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setCountryOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET country =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed country of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change country of contact: "+id+"</br>"+ex.getMessage());
+        }
+    }
+    
+/**
+     * Set familyname of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setPostalCOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET postalcode =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed postal code of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change postal code of contact: "+id+"</br>"+ex.getMessage());
+        }
+    }
     
     /**
      * Set firstname of a contact
@@ -348,7 +410,7 @@ public class DigiDB {
      * @param   id
      * @param   newValue   
      */
-    public void setFirstNameOfContact(int id, String newValue) {
+public void setFirstNameOfContact(int id, String newValue) {
         String sql = "UPDATE digischema.contactpersons SET firstname =? WHERE id="+id+";";
         try {
             PreparedStatement st = mainDB.prepareStatement(sql);
@@ -358,6 +420,25 @@ public class DigiDB {
         }
         catch (SQLException ex) {
             LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change firstname of contact: "+id+"</br>"+ex.getMessage());
+        }
+    }
+    
+    /**
+     * Set familyname of a contact
+     *      
+     * @param   id
+     * @param   newValue   
+     */
+    public void setAdressOfContact(int id, String newValue) {
+        String sql = "UPDATE digischema.contactpersons SET adress =? WHERE id="+id+";";
+        try {
+            PreparedStatement st = mainDB.prepareStatement(sql);
+            st.setString(1, newValue);
+            st.executeUpdate();
+            LOGGER.log(Level.FINE,"User "+user.getUserName()+" changed adress of contact: "+id);
+        }
+        catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE,"User "+user.getUserName()+" tried to change adress of contact: "+id+"</br>"+ex.getMessage());
         }
     }
     

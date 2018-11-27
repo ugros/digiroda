@@ -59,10 +59,15 @@ class DigiMenuListener {
     final static String MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
+    final static String COLUMN_COMPANYNAME = language.getProperty("COLUMN_COMPANYNAME");
     final static String COLUMN_FIRSTNAME = language.getProperty("COLUMN_FIRSTNAME");
     final static String COLUMN_FAMILYNAME = language.getProperty("COLUMN_FAMILYNAME");
     final static String COLUMN_PHONENUMBER = language.getProperty("COLUMN_PHONENUMBER");
     final static String COLUMN_EMAIL = language.getProperty("COLUMN_EMAIL");
+    final static String COLUMN_COUNTRY = language.getProperty("COLUMN_COUNTRY");
+    final static String COLUMN_CITY = language.getProperty("COLUMN_CITY");
+    final static String COLUMN_POSTALCODE = language.getProperty("COLUMN_POSTALCODE");
+    final static String COLUMN_ADRESS = language.getProperty("COLUMN_ADRESS");
     //</editor-fold>
 
     public static ChangeListener menuListener() {
@@ -90,6 +95,12 @@ class DigiMenuListener {
 
                     ObservableList<DigiContacts> tableList = user.getConnects().getContacts();
 
+                    TableColumn companyN = new TableColumn(COLUMN_COMPANYNAME);
+                    companyN.setMinWidth(150);
+                    companyN.setCellFactory(TextFieldTableCell.forTableColumn());
+                    companyN.setCellValueFactory(new PropertyValueFactory<>("companyName"));
+                    companyN.setOnEditCommit(DigiHandlers.companyNOnEditCommit());
+                    
                     TableColumn familyN = new TableColumn(COLUMN_FAMILYNAME);
                     familyN.setMinWidth(150);
                     familyN.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -113,8 +124,32 @@ class DigiMenuListener {
                     email.setCellFactory(TextFieldTableCell.forTableColumn());
                     email.setCellValueFactory(new PropertyValueFactory<>("email"));
                     email.setOnEditCommit(DigiHandlers.emailOnEditCommit());
+                    
+                    TableColumn country = new TableColumn(COLUMN_COUNTRY);
+                    country.setMinWidth(150);
+                    country.setCellFactory(TextFieldTableCell.forTableColumn());
+                    country.setCellValueFactory(new PropertyValueFactory<>("country"));
+                    country.setOnEditCommit(DigiHandlers.countryOnEditCommit());
+                    
+                    TableColumn city = new TableColumn(COLUMN_CITY);
+                    city.setMinWidth(150);
+                    city.setCellFactory(TextFieldTableCell.forTableColumn());
+                    city.setCellValueFactory(new PropertyValueFactory<>("city"));
+                    city.setOnEditCommit(DigiHandlers.cityOnEditCommit());
 
-                    contactsTable.getColumns().addAll(familyN, firstN, phoneN, email);
+                    TableColumn postalC = new TableColumn(COLUMN_POSTALCODE);
+                    postalC.setMinWidth(150);
+                    postalC.setCellFactory(TextFieldTableCell.forTableColumn());
+                    postalC.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+                    postalC.setOnEditCommit(DigiHandlers.postalCOnEditCommit());
+
+                    TableColumn adress = new TableColumn(COLUMN_ADRESS);
+                    adress.setMinWidth(150);
+                    adress.setCellFactory(TextFieldTableCell.forTableColumn());
+                    adress.setCellValueFactory(new PropertyValueFactory<>("adress"));
+                    adress.setOnEditCommit(DigiHandlers.adressOnEditCommit());                    
+                    
+                    contactsTable.getColumns().addAll(companyN, familyN, firstN, phoneN, email, country, city, postalC, adress);
                     contactsTable.setEditable(true);
 
                     FilteredList<DigiContacts> filteredList = new FilteredList<>(tableList);

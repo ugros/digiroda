@@ -32,10 +32,6 @@ public class DigiUser extends ussoft.User {
     private String LOGINTEXT;
     private String LOGINTITLE;
     
-    private void login() {
-        
-    }
-    
     public DigiUser(String userName, String password) {
         super(userName, password);
         if ((getUserName() == null) || (getUserName().equals(""))) {

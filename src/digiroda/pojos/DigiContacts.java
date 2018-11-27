@@ -25,9 +25,14 @@ import javafx.beans.property.SimpleStringProperty;
  */
     public class DigiContacts {
 
+        private SimpleStringProperty companyName;
         private SimpleStringProperty familyName;
         private SimpleStringProperty firstName;
         private SimpleStringProperty phoneNumber;
+        private SimpleStringProperty country;
+        private SimpleStringProperty city;
+        private SimpleStringProperty postalCode;
+        private SimpleStringProperty adress;
         private SimpleStringProperty email;
         private int id;
 
@@ -36,27 +41,50 @@ import javafx.beans.property.SimpleStringProperty;
             this.firstName = new SimpleStringProperty("");
             this.phoneNumber = new SimpleStringProperty("");
             this.email = new SimpleStringProperty("");
+            this.companyName = new SimpleStringProperty(""); 
+            this.country = new SimpleStringProperty(""); 
+            this.city = new SimpleStringProperty(""); 
+            this.postalCode = new SimpleStringProperty("");
+            this.adress = new SimpleStringProperty("");
             this.id=0;
         }
 
-        public DigiContacts(String familyName, String firstName, String phoneNumber, String email) {
-            this.familyName = new SimpleStringProperty(familyName);
-            this.firstName = new SimpleStringProperty(firstName);
-            this.phoneNumber = new SimpleStringProperty(phoneNumber);
-            this.email = new SimpleStringProperty(email);   
-            this.id=0;
-        }
-        
-        public DigiContacts(int id, String familyName, String firstName, String phoneNumber, String email) {
+   
+        public DigiContacts(int id, String companyName, String familyName, String firstName, String phoneNumber, String email, String country, String city, String postalCode, String adress) {
             this.familyName = new SimpleStringProperty(familyName);
             this.firstName = new SimpleStringProperty(firstName);
             this.phoneNumber = new SimpleStringProperty(phoneNumber);
             this.email = new SimpleStringProperty(email);  
+            this.companyName = new SimpleStringProperty(companyName); 
+            this.country = new SimpleStringProperty(country); 
+            this.city = new SimpleStringProperty(city); 
+            this.postalCode = new SimpleStringProperty(postalCode);
+            this.adress = new SimpleStringProperty(adress);
             this.id=id;
         }
         
         public int getId() {
             return this.id;
+        }
+
+        public String getCompanyName() {
+            return companyName.getValue();
+        }
+
+        public String getCountry() {
+            return country.getValue();
+        }
+
+        public String getCity() {
+            return city.getValue();
+        }
+
+        public String getPostalCode() {
+            return postalCode.getValue();
+        }
+
+        public String getAdress() {
+            return adress.getValue();
         }
 
         public String getFamilyName() {
@@ -69,6 +97,26 @@ import javafx.beans.property.SimpleStringProperty;
 
         public String getPhoneNumber() {
             return phoneNumber.getValue();
+        }
+
+        public void setCompanyName(String newValue) {
+            this.companyName = new SimpleStringProperty(newValue);
+        }
+
+        public void setCity(String newValue) {
+            this.city = new SimpleStringProperty(newValue);
+        }
+
+        public void setCountry(String newValue) {
+            this.country = new SimpleStringProperty(newValue);
+        }
+
+        public void setPostalCode(String newValue) {
+            this.postalCode = new SimpleStringProperty(newValue);
+        }
+
+        public void setAdress(String newValue) {
+            this.adress = new SimpleStringProperty(newValue);
         }
 
         public void setFamilyName(String familyName) {
@@ -86,10 +134,10 @@ import javafx.beans.property.SimpleStringProperty;
         public String getEmail() {
             return email.getValue();
         }
-        
+
         public void setEmail(String email) {
             this.email = new SimpleStringProperty(email);
         }
-        
+
         
     }

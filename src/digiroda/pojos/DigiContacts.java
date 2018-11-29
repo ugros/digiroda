@@ -17,15 +17,6 @@
 //</editor-fold>
 package digiroda;
 
-import static digiroda.DigiController.LOGGER;
-import static digiroda.DigiController.user;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
@@ -69,30 +60,6 @@ public class DigiContacts {
         this.postalCode = new SimpleStringProperty(postalCode);
         this.adress = new SimpleStringProperty(adress);
         this.id = id;
-    }
-
-    public static void checkDBTables() {
-        String sql = "SELECT datname as name FROM pg_catalog.pg_database WHERE datname='digidb' union all \n"
-                + "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'digischema' union all \n"
-                + "SELECT table_name FROM information_schema.tables WHERE  table_schema = 'digischema';";
-        try {
-            PreparedStatement st = user.getConnects().getMainDB().prepareStatement(sql);
-            ResultSet rs = st.executeQuery();
-                        
-            List<String> dbList = new ArrayList<>();
-            while (rs.next()) {
-              dbList.add(rs.getString("name"));
-            }
-            
-            String[] checkList={"digidb","digischema","files","companies","contactpersons", "rights", "userrights","users"};
-            if (dbList.containsAll(Arrays.asList(checkList)))
-                LOGGER.log(Level.FINE, "The main database and tables are ready for use.");   
-            else
-                LOGGER.log(Level.SEVERE, "The main database, schema or tables don't exist.");    
-            
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error while checked main database and its tables: " + ex.getMessage());
-        }
     }
 
     public int getId() {

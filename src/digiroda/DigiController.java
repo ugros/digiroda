@@ -214,7 +214,6 @@ public class DigiController implements Initializable {
         if (user.getChecked()) {            
             setMenuItems();
             setFXML();
-            DigiContacts.checkDBTables();
         } else {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
            user.getConnects().close();

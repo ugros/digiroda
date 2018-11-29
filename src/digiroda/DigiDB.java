@@ -39,7 +39,10 @@ import static digiroda.DigiController.user;
 import static digiroda.DigiController.LOGGER;
 import static digiroda.DigiController.language;
 import static digiroda.DigiController.config;
+import static digiroda.DigiController.user;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 /**
@@ -92,7 +95,13 @@ public class DigiDB {
         MAINDB = config.getProperty("MAINDB");        
         mainDB= setMainDB(MAINHOST,MAINDB,user,password);
         if (mainDB!=null) 
-            LOGGER.log(Level.FINE, "Connected to the main database"); 
+        {
+            LOGGER.log(Level.FINE, "Connected to the main database");
+            if (!checkDBTables()) {
+                close();
+                System.exit(0);
+            }
+        }
         else 
         {
             close();
@@ -178,6 +187,38 @@ public class DigiDB {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
+    }
+    
+    
+    /**
+     * This method checks th main database (digidb), schema (digischema) and all of tables.
+     */
+     public boolean checkDBTables() {
+        String sql = "SELECT datname as name FROM pg_catalog.pg_database WHERE datname='digidb' union all \n"
+                + "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'digischema' union all \n"
+                + "SELECT table_name FROM information_schema.tables WHERE  table_schema = 'digischema';";
+        try {
+            PreparedStatement st = getMainDB().prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+                        
+            List<String> dbList = new ArrayList<>();
+            while (rs.next()) {
+              dbList.add(rs.getString("name"));
+            }
+            
+            String[] checkList={"digidb","digischema","files","companies","contactpersons", "rights", "userrights","users"};
+            if (dbList.containsAll(Arrays.asList(checkList)))
+            {
+                LOGGER.log(Level.FINE, "The main database and tables are ready for use."); 
+                return true;
+            }
+            else
+                LOGGER.log(Level.SEVERE, "The main database, schema or tables don't exist.");    
+            
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error while checked main database and its tables: " + ex.getMessage());
+        }
+        return false;
     }
 
     

@@ -205,15 +205,16 @@ public class DigiController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {  
-        readProperties();
-        
+        readProperties();        
         setLogger();      
         LOGGER.log(Level.INFO,"Program started normally.");
+              
         
         user= new DigiUser(null,null);
         if (user.getChecked()) {            
             setMenuItems();
             setFXML();
+            DigiContacts.checkDBTables();
         } else {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
            user.getConnects().close();

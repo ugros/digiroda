@@ -62,7 +62,7 @@ public class USLogger extends Logger {
             // If you require it to make the entire directory path including parents,
             // use directory.mkdirs(); here instead.
         }
-        fileName = directory+"/LOG_" + dateFormat.format(date).toString() + ".html";
+        fileName = directory+"/LOG_" + dateFormat.format(date).toString() + ".log";
        
         //fileHTML = new FileHandler(fileName);
         fileHTML = new FileHandler(fileName,true);

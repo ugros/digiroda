@@ -57,6 +57,11 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
 import java.io.FileFilter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventType;
@@ -70,12 +75,10 @@ class DigiMenuListener {
 
     private int counter = 0;
     private File[] list;
-    private File fileEntry;
     private Integer h;
     private GridPane gridPane;
     private ProgressBar pb;
     private ImageView imageView;
-    private static Thread thread;
 
     //<editor-fold defaultstate="collapsed" desc="Declaration of menu's constants">
     final static String MENU = language.getProperty("MENU");
@@ -98,6 +101,12 @@ class DigiMenuListener {
     final static String COLUMN_POSTALCODE = language.getProperty("COLUMN_POSTALCODE");
     final static String COLUMN_ADRESS = language.getProperty("COLUMN_ADRESS");
     //</editor-fold>
+
+    static String readFile(String path, Charset encoding)
+            throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded, encoding);
+    }
 
     public ChangeListener menuListener() {
         return (ChangeListener) new ChangeListener() {
@@ -217,18 +226,23 @@ class DigiMenuListener {
                         FileChooser fileChooser = new FileChooser();
                         fileChooser.setTitle(language.getProperty("TITLE_LOG"));
                         fileChooser.setInitialDirectory(new File(config.getProperty("LOGDIR")));
-                        fileChooser.getExtensionFilters().add(new ExtensionFilter("Naplófájlok", "*.html"));
-                        // File f = new File("./LOG/LOG_20181125.html");
+                        fileChooser.getExtensionFilters().add(new ExtensionFilter("Naplófájlok", "*.log"));
                         File f = fileChooser.showOpenDialog(null);
                         if (f != null) {
-                            webEngine.load(f.toURI().toString());
-                            contactsSplitP.setVisible(false);
-                            cleanScrollPane.setVisible(false);
-                            cleanAnchorPane.setVisible(false);
-                            cleanStackPane.setVisible(true);
-                            cleanStackPane.getChildren().add(webView);
-                            cleanStackPane.autosize();
-                            LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked log file: " + f.getAbsolutePath());
+                            try {
+                                //webEngine.load(f.toURI().toString());
+                                String content = readFile(f.getPath(), StandardCharsets.UTF_8);
+                                webView.getEngine().loadContent(content, "text/html");
+                                contactsSplitP.setVisible(false);
+                                cleanScrollPane.setVisible(false);
+                                cleanAnchorPane.setVisible(false);
+                                cleanStackPane.setVisible(true);
+                                cleanStackPane.getChildren().add(webView);
+                                cleanStackPane.autosize();
+                                LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked log file: " + f.getAbsolutePath());
+                            } catch (IOException ex) {
+                                Logger.getLogger(DigiMenuListener.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     } else {
                         LOGGER.log(Level.WARNING, user.getUserName() + " tried to check log files.");
@@ -271,11 +285,11 @@ class DigiMenuListener {
                         protected Void call() throws Exception {
                             for (File fileEntry : list) {
                                 try {
-                                    PDDocument document = PDDocument.load(fileEntry);
-
-                                    PDFRenderer renderer = new PDFRenderer(document);
-                                    BufferedImage bufferedImge = renderer.renderImage(0);
-                                    document.close();
+                                    BufferedImage bufferedImge;
+                                    try (PDDocument document = PDDocument.load(fileEntry)) {
+                                        PDFRenderer renderer = new PDFRenderer(document);
+                                        bufferedImge = renderer.renderImage(0);
+                                    }
                                     Image image = SwingFXUtils.toFXImage(bufferedImge, null);
                                     Float ratio = h / (float) image.getHeight();
 
@@ -314,12 +328,7 @@ class DigiMenuListener {
 
                                 } catch (IOException e) {
                                     LOGGER.log(Level.SEVERE, e.getMessage());
-                                    //}
                                 }
-//                            if (counter == list.length) {
-//                                this.cancel();
-//                            }
-//                            
                             }
                             return null;
                         }

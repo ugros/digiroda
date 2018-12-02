@@ -61,7 +61,6 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventType;
 import javafx.scene.control.ProgressBar;
-import ussoft.USDialogs;
 
 /**
  *
@@ -246,7 +245,7 @@ class DigiMenuListener {
                     vBox.getStyleClass().add("vbox");
                     gridPane = new GridPane();
                     gridPane.getStyleClass().add("gridpane");
-                    
+
                     h = Integer.parseInt(config.getProperty("PREVIEW_HEIGHT"));
                     final File directory = new File(config.getProperty("READFROM"));
 
@@ -271,58 +270,61 @@ class DigiMenuListener {
                         @Override
                         protected Void call() throws Exception {
                             for (File fileEntry : list) {
-                            try {
-                                PDDocument document = PDDocument.load(fileEntry);
+                                try {
+                                    PDDocument document = PDDocument.load(fileEntry);
 
-                                PDFRenderer renderer = new PDFRenderer(document);
-                                BufferedImage bufferedImge = renderer.renderImage(0);
-                                document.close();
-                                Image image = SwingFXUtils.toFXImage(bufferedImge, null);
-                                Float ratio = h / (float) image.getHeight();
+                                    PDFRenderer renderer = new PDFRenderer(document);
+                                    BufferedImage bufferedImge = renderer.renderImage(0);
+                                    document.close();
+                                    Image image = SwingFXUtils.toFXImage(bufferedImge, null);
+                                    Float ratio = h / (float) image.getHeight();
 
-                                imageView = new ImageView();
-                                imageView = new ImageView();
-                                imageView.setImage(image);
-                                imageView.setFitHeight(h);
-                                imageView.setFitWidth(ratio * image.getWidth());
+                                    imageView = new ImageView();
+                                    imageView = new ImageView();
+                                    imageView.setImage(image);
+                                    imageView.setFitHeight(h);
+                                    imageView.setFitWidth(ratio * image.getWidth());
 
-                                Platform.runLater(() -> {
+                                    Platform.runLater(() -> {
 
-                                    HBox hBox = new HBox();
-                                    HBox hBox1 = new HBox();
-                                    HBox hBox2 = new HBox();
+                                        HBox hBox = new HBox();
+                                        HBox hBox1 = new HBox();
+                                        HBox hBox2 = new HBox();
 
-                                    hBox1.getChildren().addAll(imageView);
-                                    hBox1.getStyleClass().add("img");
-                                    GridPane grid = new GridPane();
-                                    Button btn = new Button("Érkeztet");
-                                    //btn.getStyleClass().add("btn");
-                                    //btn.setId("xxx");
-                                    grid.add(btn, 0, 0);
+                                        hBox1.getChildren().addAll(imageView);
+                                        hBox1.getStyleClass().add("img");
+                                        GridPane grid = new GridPane();
+                                        Button btn = new Button("Érkeztet");
+                                        //btn.getStyleClass().add("btn");
+                                        //btn.setId("xxx");
+                                        grid.add(btn, 0, 0);
 
-                                    hBox2.getChildren().addAll(grid);
-                                    hBox.getChildren().addAll(hBox1, hBox2);
+                                        hBox2.getChildren().addAll(grid);
+                                        hBox.getChildren().addAll(hBox1, hBox2);
 
-                                    hBox.getStyleClass().add("hbox");
-                                    hBox1.getStyleClass().add("hbox1");
-                                    hBox1.addEventFilter(EventType.ROOT, DigiHandlers.clickOnPDFPreview(fileEntry));
+                                        hBox.getStyleClass().add("hbox");
+                                        hBox1.getStyleClass().add("hbox1");
+                                        hBox1.addEventFilter(EventType.ROOT, DigiHandlers.clickOnPDFPreview(fileEntry));
 
-                                    hBox2.getStyleClass().add("hbox2");
-                                    gridPane.add(hBox, counter % 2, ((Integer) counter / 2));
-                                    counter++;
+                                        hBox2.getStyleClass().add("hbox2");
+                                        gridPane.add(hBox, counter % 2, ((Integer) counter / 2));
+                                        counter++;
 
-                                });
+                                    });
 
-                            } catch (IOException e) {
-                                LOGGER.log(Level.SEVERE, e.getMessage());
-                                //}
-                            }
+                                } catch (IOException e) {
+                                    LOGGER.log(Level.SEVERE, e.getMessage());
+                                    //}
+                                }
 //                            if (counter == list.length) {
 //                                this.cancel();
 //                            }
 //                            
-                            } return null;
-                    }; };
+                            }
+                            return null;
+                        }
+                    ;
+                    };
                     new Thread(longRunningTask).start();
                     //</editor-fold>
                 } else if (selected.equals(MENU_QUIT)) {

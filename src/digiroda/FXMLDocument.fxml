@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?> 
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -50,10 +51,16 @@
                             </AnchorPane>
                         </items>
                     </SplitPane>
-
-                    <StackPane id="logPane" fx:id="logPane" prefWidth="650.0">
+                    <StackPane id="cleanStackFXML" fx:id="cleanStackFXML" prefWidth="650.0">
                
                     </StackPane>
+                    <AnchorPane id="cleanAnchorFXML" fx:id="cleanAnchorFXML" prefWidth="650.0">
+               
+                    </AnchorPane>
+
+                    <ScrollPane id="cleanScrollFXML" fx:id="cleanScrollFXML" prefWidth="650.0">
+               
+                    </ScrollPane>
                <effect>
                   <Blend />
                </effect>

@@ -32,10 +32,11 @@ import javafx.stage.Stage;
 
 
 public class DigIroda extends Application {
+    public static Parent root;
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
+        root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.getIcons().add(new Image("resources/images/office.png"));

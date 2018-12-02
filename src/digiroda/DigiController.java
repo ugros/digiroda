@@ -18,6 +18,7 @@
 package digiroda;
 
 import static digiroda.DigiMenuListener.MENU;
+import static digiroda.DigiMenuListener.MENU_ARRIVE;
 import static digiroda.DigiMenuListener.MENU_CONTACTS;
 import static digiroda.DigiMenuListener.MENU_EXPORT;
 import static digiroda.DigiMenuListener.MENU_LOGS;
@@ -35,6 +36,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -63,7 +65,11 @@ public class DigiController implements Initializable {
     @FXML
     AnchorPane contactsAddPane;
     @FXML
-    StackPane logPane;    
+    StackPane cleanStackFXML;  
+    @FXML
+    AnchorPane cleanAnchorFXML;  
+    @FXML
+    ScrollPane cleanScrollFXML;  
     @FXML
     Label label;
     @FXML
@@ -79,14 +85,16 @@ public class DigiController implements Initializable {
     @FXML
     TextField filterText;
     static SplitPane contactsSplitP;
-    static StackPane logP;
+    static ScrollPane cleanScrollPane;
+    static StackPane cleanStackPane;
+    static AnchorPane cleanAnchorPane;
     static TableView contactsTable;
     static StackPane dataP;
     static TextField filterT;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
-    static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem11, treeItem12;
+    static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem5, treeItem11, treeItem12;
     final static Properties language = new Properties();
     final static Properties config = new Properties();
     static DigiUser user=null;
@@ -149,14 +157,19 @@ public class DigiController implements Initializable {
         
         treeItem3= new TreeItem<>(MENU_LOGS);
         
-        treeItem4 = new TreeItem<>(MENU_QUIT);
+        treeItem4 = new TreeItem<>(MENU_ARRIVE);
         
-        rootItem.getChildren().addAll(treeItem1, treeItem2, treeItem3, treeItem4);
+        treeItem5 = new TreeItem<>(MENU_QUIT);
+        
+        rootItem.getChildren().addAll(treeItem1, treeItem2, treeItem3, treeItem4,treeItem5);
         menuPane.getChildren().add(treeView);
+        
+        digiroda.DigiController.rootItem.setExpanded(true);
         //</editor-fold>
 
         //<editor-fold defaultstate="collapsed" desc="Adding menu listener">
-        treeView.getSelectionModel().selectedItemProperty().addListener(DigiMenuListener.menuListener());
+        DigiMenuListener menuListener= new DigiMenuListener();
+        treeView.getSelectionModel().selectedItemProperty().addListener(menuListener.menuListener());
         //</editor-fold>
        
     }
@@ -166,8 +179,14 @@ public class DigiController implements Initializable {
         contactsSplitP=new SplitPane();
         contactsSplitP=contactsSplitPane;
         
-        logP=new StackPane();        
-        logP=logPane;
+        cleanScrollPane=new ScrollPane();        
+        cleanScrollPane=cleanScrollFXML;
+        
+        cleanStackPane=new StackPane();        
+        cleanStackPane=cleanStackFXML;
+        
+        cleanAnchorPane=new AnchorPane();        
+        cleanAnchorPane=cleanAnchorFXML;
         
         contactsTable=new TableView();
         contactsTable=table;
@@ -214,6 +233,7 @@ public class DigiController implements Initializable {
         if (user.getChecked()) {            
             setMenuItems();
             setFXML();
+            root.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
         } else {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
            user.getConnects().close();

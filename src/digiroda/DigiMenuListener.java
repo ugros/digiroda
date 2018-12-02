@@ -18,14 +18,16 @@
 package digiroda;
 
 import static digiroda.DigiController.LOGGER;
+import static digiroda.DigiController.cleanAnchorPane;
 import static digiroda.DigiController.user;
-import static digiroda.DigiController.logP;
 import static digiroda.DigiController.config;
 import static digiroda.DigiController.contactsSplitP;
 import static digiroda.DigiController.contactsTable;
 import static digiroda.DigiController.dataP;
 import static digiroda.DigiController.filterT;
 import static digiroda.DigiController.language;
+import static digiroda.DigiController.cleanScrollPane;
+import static digiroda.DigiController.cleanStackPane;
 
 import java.util.logging.Level;
 import java.util.function.Predicate;
@@ -42,12 +44,39 @@ import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+
+import java.io.FileFilter;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.event.EventType;
+import javafx.scene.control.ProgressBar;
+import ussoft.USDialogs;
 
 /**
  *
  * @author ugros
  */
 class DigiMenuListener {
+
+    private int counter = 0;
+    private File[] list;
+    private File fileEntry;
+    private Integer h;
+    private GridPane gridPane;
+    private ProgressBar pb;
+    private ImageView imageView;
+    private static Thread thread;
 
     //<editor-fold defaultstate="collapsed" desc="Declaration of menu's constants">
     final static String MENU = language.getProperty("MENU");
@@ -57,6 +86,7 @@ class DigiMenuListener {
     final static String MENU_CONTACTS = language.getProperty("MENU_CONTACTS");
     final static String MENU_SHOWCONTACTS = language.getProperty("MENU_SHOWCONTACTS");
     final static String MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
+    final static String MENU_ARRIVE = language.getProperty("MENU_ARRIVE");
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
     final static String COLUMN_COMPANYNAME = language.getProperty("COLUMN_COMPANYNAME");
@@ -70,7 +100,7 @@ class DigiMenuListener {
     final static String COLUMN_ADRESS = language.getProperty("COLUMN_ADRESS");
     //</editor-fold>
 
-    public static ChangeListener menuListener() {
+    public ChangeListener menuListener() {
         return (ChangeListener) new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -80,7 +110,7 @@ class DigiMenuListener {
                     //<editor-fold defaultstate="collapsed" desc="MENU_ROOT">
                     digiroda.DigiController.rootItem.setExpanded(true);
                     //</editor-fold>
-                }else if (selected.equals(MENU_CONTACTS)) {
+                } else if (selected.equals(MENU_CONTACTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_CONTACTS">
                     digiroda.DigiController.treeItem1.setExpanded(true);
                     //</editor-fold>
@@ -90,7 +120,9 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_SHOWCONTACTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SHOWCONTACTS">
-                    logP.setVisible(false);
+                    cleanScrollPane.setVisible(false);
+                    cleanAnchorPane.setVisible(false);
+                    cleanStackPane.setVisible(false);
                     contactsSplitP.setVisible(true);
 
                     ObservableList<DigiContacts> tableList = user.getConnects().getContacts();
@@ -100,7 +132,7 @@ class DigiMenuListener {
                     companyN.setCellFactory(TextFieldTableCell.forTableColumn());
                     companyN.setCellValueFactory(new PropertyValueFactory<>("companyName"));
                     companyN.setOnEditCommit(DigiHandlers.companyNOnEditCommit());
-                    
+
                     TableColumn familyN = new TableColumn(COLUMN_FAMILYNAME);
                     familyN.setMinWidth(150);
                     familyN.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -124,13 +156,13 @@ class DigiMenuListener {
                     email.setCellFactory(TextFieldTableCell.forTableColumn());
                     email.setCellValueFactory(new PropertyValueFactory<>("email"));
                     email.setOnEditCommit(DigiHandlers.emailOnEditCommit());
-                    
+
                     TableColumn country = new TableColumn(COLUMN_COUNTRY);
                     country.setMinWidth(150);
                     country.setCellFactory(TextFieldTableCell.forTableColumn());
                     country.setCellValueFactory(new PropertyValueFactory<>("country"));
                     country.setOnEditCommit(DigiHandlers.countryOnEditCommit());
-                    
+
                     TableColumn city = new TableColumn(COLUMN_CITY);
                     city.setMinWidth(150);
                     city.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -147,8 +179,8 @@ class DigiMenuListener {
                     adress.setMinWidth(150);
                     adress.setCellFactory(TextFieldTableCell.forTableColumn());
                     adress.setCellValueFactory(new PropertyValueFactory<>("adress"));
-                    adress.setOnEditCommit(DigiHandlers.adressOnEditCommit());                    
-                    
+                    adress.setOnEditCommit(DigiHandlers.adressOnEditCommit());
+
                     contactsTable.getColumns().addAll(companyN, familyN, firstN, phoneN, email, country, city, postalC, adress);
                     contactsTable.setEditable(true);
 
@@ -192,14 +224,106 @@ class DigiMenuListener {
                         if (f != null) {
                             webEngine.load(f.toURI().toString());
                             contactsSplitP.setVisible(false);
-                            logP.setVisible(true);
-                            logP.getChildren().add(webView);
-                            logP.autosize();
+                            cleanScrollPane.setVisible(false);
+                            cleanAnchorPane.setVisible(false);
+                            cleanStackPane.setVisible(true);
+                            cleanStackPane.getChildren().add(webView);
+                            cleanStackPane.autosize();
                             LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked log file: " + f.getAbsolutePath());
-                        }                        
+                        }
                     } else {
                         LOGGER.log(Level.WARNING, user.getUserName() + " tried to check log files.");
                     }
+                    //</editor-fold>
+                } else if (selected.equals(MENU_ARRIVE)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_ARRIVE">
+                    contactsSplitP.setVisible(false);
+                    cleanAnchorPane.setVisible(false);
+                    cleanStackPane.setVisible(false);
+                    cleanScrollPane.setVisible(true);
+
+                    VBox vBox = new VBox();
+                    vBox.getStyleClass().add("vbox");
+                    gridPane = new GridPane();
+                    gridPane.getStyleClass().add("gridpane");
+                    
+                    h = Integer.parseInt(config.getProperty("PREVIEW_HEIGHT"));
+                    final File directory = new File(config.getProperty("READFROM"));
+
+                    list = directory.listFiles(new FileFilter() {
+                        @Override
+                        public boolean accept(File pathname) {
+                            if (pathname.isFile()
+                                    && pathname.getName().toLowerCase().endsWith(".pdf")) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    });
+
+                    vBox.getChildren().addAll(gridPane);
+                    cleanScrollPane.setContent(vBox);
+
+                    Task<Void> longRunningTask = new Task<Void>() {
+                        private int counter;
+
+                        @Override
+                        protected Void call() throws Exception {
+                            for (File fileEntry : list) {
+                            try {
+                                PDDocument document = PDDocument.load(fileEntry);
+
+                                PDFRenderer renderer = new PDFRenderer(document);
+                                BufferedImage bufferedImge = renderer.renderImage(0);
+                                document.close();
+                                Image image = SwingFXUtils.toFXImage(bufferedImge, null);
+                                Float ratio = h / (float) image.getHeight();
+
+                                imageView = new ImageView();
+                                imageView = new ImageView();
+                                imageView.setImage(image);
+                                imageView.setFitHeight(h);
+                                imageView.setFitWidth(ratio * image.getWidth());
+
+                                Platform.runLater(() -> {
+
+                                    HBox hBox = new HBox();
+                                    HBox hBox1 = new HBox();
+                                    HBox hBox2 = new HBox();
+
+                                    hBox1.getChildren().addAll(imageView);
+                                    hBox1.getStyleClass().add("img");
+                                    GridPane grid = new GridPane();
+                                    Button btn = new Button("Érkeztet");
+                                    //btn.getStyleClass().add("btn");
+                                    //btn.setId("xxx");
+                                    grid.add(btn, 0, 0);
+
+                                    hBox2.getChildren().addAll(grid);
+                                    hBox.getChildren().addAll(hBox1, hBox2);
+
+                                    hBox.getStyleClass().add("hbox");
+                                    hBox1.getStyleClass().add("hbox1");
+                                    hBox1.addEventFilter(EventType.ROOT, DigiHandlers.clickOnPDFPreview(fileEntry));
+
+                                    hBox2.getStyleClass().add("hbox2");
+                                    gridPane.add(hBox, counter % 2, ((Integer) counter / 2));
+                                    counter++;
+
+                                });
+
+                            } catch (IOException e) {
+                                LOGGER.log(Level.SEVERE, e.getMessage());
+                                //}
+                            }
+//                            if (counter == list.length) {
+//                                this.cancel();
+//                            }
+//                            
+                            } return null;
+                    }; };
+                    new Thread(longRunningTask).start();
                     //</editor-fold>
                 } else if (selected.equals(MENU_QUIT)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_QUIT">

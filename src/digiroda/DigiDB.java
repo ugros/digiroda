@@ -42,6 +42,7 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import javafx.scene.control.ToggleGroup;
 
 /**
  * The DigiDB class takes care about two database connections (localDB and
@@ -52,6 +53,7 @@ import java.util.HashSet;
  */
 public class DigiDB {
 
+    private final  String[] checkList = {"digidb", "digischema", "files", "companies", "contactpersons", "rights", "userrights", "users", "divisions"};
     private final Connection localDB;
     private final Connection mainDB;
     private final String LOCALHOST;
@@ -187,6 +189,28 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, null, ex);
         }
     }
+    
+    public List<String> getRadioButtonsOFDivisions() {
+        List<String> radioButtons = new ArrayList<>();
+        String sql = "SELECT users.familyname, users.firstname, divisions.name as division"
+                + " FROM digischema.users, digischema.divisions "
+                + " WHERE users.id=divisions.bossid;";
+        ToggleGroup toggleGroup = new ToggleGroup();
+        toggleGroup.selectedToggleProperty().addListener((observable, oldVal, newVal) -> System.out.println(newVal + " was selected"));
+        try {
+            PreparedStatement st = getMainDB().prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                radioButtons.add(rs.getString("division")+"\n"
+                      +rs.getString("familyname")+" "+rs.getString("firstname"));
+                //(new RadioButton(rs.getString("division")+"</br>"
+                //        +rs.getString("familyname")+" "+rs.getString("firstname"))).setToggleGroup(toggleGroup);
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error while reading divisions: " + ex.getMessage());
+        }
+        return radioButtons;
+    }
 
     /**
      * This method checks th main database (digidb), schema (digischema) and all
@@ -205,7 +229,6 @@ public class DigiDB {
                 dbList.add(rs.getString("name"));
             }
 
-            String[] checkList = {"digidb", "digischema", "files", "companies", "contactpersons", "rights", "userrights", "users"};
             if (dbList.containsAll(Arrays.asList(checkList))) {
                 LOGGER.log(Level.FINE, "The main database and tables are ready for use.");
                 return true;

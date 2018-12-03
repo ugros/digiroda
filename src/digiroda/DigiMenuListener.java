@@ -61,11 +61,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventType;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 
 /**
  *
@@ -74,8 +77,8 @@ import javafx.scene.control.ProgressBar;
 class DigiMenuListener {
 
     private int counter = 0;
-    private File[] list;
-    private Integer h;
+    private File[] fileList;
+    private Integer width;
     private GridPane gridPane;
     private ProgressBar pb;
     private ImageView imageView;
@@ -260,10 +263,10 @@ class DigiMenuListener {
                     gridPane = new GridPane();
                     gridPane.getStyleClass().add("gridpane");
 
-                    h = Integer.parseInt(config.getProperty("PREVIEW_HEIGHT"));
+                    width = Integer.parseInt(config.getProperty("PREVIEW_WIDTH"));
                     final File directory = new File(config.getProperty("READFROM"));
 
-                    list = directory.listFiles(new FileFilter() {
+                    fileList = directory.listFiles(new FileFilter() {
                         @Override
                         public boolean accept(File pathname) {
                             if (pathname.isFile()
@@ -280,24 +283,24 @@ class DigiMenuListener {
 
                     Task<Void> longRunningTask = new Task<Void>() {
                         private int counter;
-
+                        private List<String> radioButtons=user.getConnects().getRadioButtonsOFDivisions();
                         @Override
                         protected Void call() throws Exception {
-                            for (File fileEntry : list) {
+                            for (File file : fileList) {
                                 try {
                                     BufferedImage bufferedImge;
-                                    try (PDDocument document = PDDocument.load(fileEntry)) {
+                                    try (PDDocument document = PDDocument.load(file)) {
                                         PDFRenderer renderer = new PDFRenderer(document);
                                         bufferedImge = renderer.renderImage(0);
                                     }
                                     Image image = SwingFXUtils.toFXImage(bufferedImge, null);
-                                    Float ratio = h / (float) image.getHeight();
+                                    Float ratio = width / (float) image.getWidth();
 
                                     imageView = new ImageView();
                                     imageView = new ImageView();
                                     imageView.setImage(image);
-                                    imageView.setFitHeight(h);
-                                    imageView.setFitWidth(ratio * image.getWidth());
+                                    imageView.setFitWidth(width);
+                                    imageView.setFitHeight(ratio * image.getHeight());
 
                                     Platform.runLater(() -> {
 
@@ -308,17 +311,32 @@ class DigiMenuListener {
                                         hBox1.getChildren().addAll(imageView);
                                         hBox1.getStyleClass().add("img");
                                         GridPane grid = new GridPane();
+                                        grid.getStyleClass().add("radiobuttons");
                                         Button btn = new Button("Érkeztet");
                                         //btn.getStyleClass().add("btn");
                                         //btn.setId("xxx");
-                                        grid.add(btn, 0, 0);
+                                        ToggleGroup tg= new ToggleGroup();
+                                        int i;
+                                        for (i=0;i<radioButtons.size();i++) { 
+                                            //HBox h=new HBox();
+                                            RadioButton rb= new RadioButton(radioButtons.get(i));
+                                            rb.setMinWidth(150);
+                                            rb.setMaxWidth(150);
+                                            //h.getChildren().add(rb);
+                                           // h.getStyleClass().add("box");
+                                            rb.setToggleGroup(tg);
+                                            grid.add(rb, 0, i);
+                                            System.out.println(radioButtons.get(i));
+                                        }
+                                        
+                                        grid.add(btn, 0, i+1);
 
                                         hBox2.getChildren().addAll(grid);
                                         hBox.getChildren().addAll(hBox1, hBox2);
 
                                         hBox.getStyleClass().add("hbox");
                                         hBox1.getStyleClass().add("hbox1");
-                                        hBox1.addEventFilter(EventType.ROOT, DigiHandlers.clickOnPDFPreview(fileEntry));
+                                        hBox1.addEventFilter(EventType.ROOT, DigiHandlers.clickOnPDFPreview(file));
 
                                         hBox2.getStyleClass().add("hbox2");
                                         gridPane.add(hBox, counter % 2, ((Integer) counter / 2));

@@ -34,8 +34,8 @@ import ussoft.USDialogs;
  * @author ugros
  */
 public class DigiHandlers {
-
-    public static EventHandler familyNOnEditCommit() {
+    
+   public static EventHandler familyNOnEditCommit() {
         return new EventHandler<TableColumn.CellEditEvent<DigiContacts, String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<DigiContacts, String> t) {

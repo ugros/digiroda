@@ -57,6 +57,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -64,11 +67,15 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import ussoft.USDialogs;
 
 /**
  *
@@ -110,6 +117,61 @@ class DigiMenuListener {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
     }
+    
+    public EventHandler colValueCommit() {
+        return new EventHandler<TableColumn.CellEditEvent<Settings, String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<Settings, String> t) {
+                // ((Settings) t.getTableView().getItems().get(t.getTablePosition().getRow())).setKey(t.getNewValue());
+                String key = ((Settings) t.getTableView().getItems().get(t.getTablePosition().getRow())).getKey();
+                String value = ((Settings) t.getTableView().getItems().get(t.getTablePosition().getRow())).getValue();
+                try {
+                    config.setProperty(key, value);
+                    File f=new File("x.xml");
+                    if (!f.exists()) 
+                        f.createNewFile();
+                    OutputStream os=new FileOutputStream(f);
+                    config.storeToXML(os, "Beállítások");
+                } catch (IOException ex) {
+                    Logger.getLogger(DigiMenuListener.class.getName()).log(Level.SEVERE, null, ex);
+                } 
+            }
+        };
+    }
+
+    public EventHandler colKeyCommit() {
+        return new EventHandler<TableColumn.CellEditEvent<Settings, String>>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent<Settings, String> t) {
+                USDialogs.warning("Ez Nem megy", "Ezt sejnos nem teheted meg!");
+            }
+        };
+    }
+    
+    public class Settings {
+                        private SimpleStringProperty key;
+                        private SimpleStringProperty value;
+                        public Settings() {
+                            this.key = new SimpleStringProperty("");
+                            this.value = new SimpleStringProperty("");
+                        }
+                        public Settings(String key, String value) {
+                            this.key = new SimpleStringProperty(key);
+                            this.value = new SimpleStringProperty(value);
+                        }
+                        public String getKey() {
+                            return this.key.getValue();
+                        }
+                        public String getValue() {
+                            return this.value.getValue();
+                        }
+                        public void setKey(String newValue) {
+                            this.key = new SimpleStringProperty(newValue);
+                        }                        
+                        public void setValue(String newValue) {
+                            this.value = new SimpleStringProperty(newValue);
+                        }                        
+                    }
 
     public ChangeListener menuListener() {
         return (ChangeListener) new ChangeListener() {
@@ -135,7 +197,8 @@ class DigiMenuListener {
                     cleanAnchorPane.setVisible(false);
                     cleanStackPane.setVisible(false);
                     contactsSplitP.setVisible(true);
-
+                    contactsTable.getColumns().clear();
+                    
                     ObservableList<DigiContacts> tableList = user.getConnects().getContacts();
 
                     TableColumn companyN = new TableColumn(COLUMN_COMPANYNAME);
@@ -219,7 +282,52 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_SETTINGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
-                    LOGGER.log(Level.FINE, "A beállítások menüpontot választottad");
+                    cleanScrollPane.setVisible(false);
+                    cleanAnchorPane.setVisible(false);
+                    cleanStackPane.setVisible(false);
+                    contactsSplitP.setVisible(true);
+                    contactsTable.getColumns().clear();
+                   
+                    ObservableList<Settings> tableList = FXCollections.observableArrayList();
+                    config.forEach((key, value) -> {
+                        //System.out.println("Key : " + key + " Value : " + value);
+                        tableList.add(new Settings((String)key,(String)value));
+                    });
+
+                    TableColumn colKey = new TableColumn("Változó");
+                    colKey.setMinWidth(150);
+                    colKey.setCellFactory(TextFieldTableCell.forTableColumn());
+                    colKey.setCellValueFactory(new PropertyValueFactory<>("key"));
+                    colKey.setOnEditCommit(colKeyCommit());
+
+                    TableColumn colValue = new TableColumn("Érték");
+                    colValue.setMinWidth(150);
+                    colValue.setCellFactory(TextFieldTableCell.forTableColumn());
+                    colValue.setCellValueFactory(new PropertyValueFactory<>("value"));
+                    colValue.setOnEditCommit(colValueCommit());                    
+                    
+                    contactsTable.getColumns().addAll(colKey,colValue);
+                    contactsTable.setEditable(true);
+                    FilteredList<Settings> filteredList = new FilteredList<>(tableList);
+                    filterT.textProperty().addListener((observable2, oldValue2, newValue2) -> {
+                        filteredList.setPredicate(
+                                new Predicate<Settings>() {
+                            public boolean test(Settings t) {
+                                if (t.getKey().toUpperCase().contains(filterT.getText().toUpperCase())
+                                        || t.getValue().toUpperCase().contains(filterT.getText().toUpperCase())) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
+                        });
+                    });
+
+                    contactsTable.setItems(filteredList);
+                   /* contactsTable.blendModeProperty();
+
+                    contactsTable.minWidthProperty().bind(dataP.widthProperty());
+                    contactsTable.maxWidthProperty().bind(dataP.widthProperty());*/
                     //</editor-fold>
                 } else if (selected.equals(MENU_LOGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_LOGS">
@@ -283,7 +391,8 @@ class DigiMenuListener {
 
                     Task<Void> longRunningTask = new Task<Void>() {
                         private int counter;
-                        private List<String> radioButtons=user.getConnects().getRadioButtonsOFDivisions();
+                        private List<String> radioButtons = user.getConnects().getRadioButtonsOFDivisions();
+
                         @Override
                         protected Void call() throws Exception {
                             for (File file : fileList) {
@@ -315,21 +424,21 @@ class DigiMenuListener {
                                         Button btn = new Button("Érkeztet");
                                         //btn.getStyleClass().add("btn");
                                         //btn.setId("xxx");
-                                        ToggleGroup tg= new ToggleGroup();
+                                        ToggleGroup tg = new ToggleGroup();
                                         int i;
-                                        for (i=0;i<radioButtons.size();i++) { 
+                                        for (i = 0; i < radioButtons.size(); i++) {
                                             //HBox h=new HBox();
-                                            RadioButton rb= new RadioButton(radioButtons.get(i));
+                                            RadioButton rb = new RadioButton(radioButtons.get(i));
                                             rb.setMinWidth(150);
                                             rb.setMaxWidth(150);
                                             //h.getChildren().add(rb);
-                                           // h.getStyleClass().add("box");
+                                            // h.getStyleClass().add("box");
                                             rb.setToggleGroup(tg);
                                             grid.add(rb, 0, i);
                                             System.out.println(radioButtons.get(i));
                                         }
-                                        
-                                        grid.add(btn, 0, i+1);
+
+                                        grid.add(btn, 0, i + 1);
 
                                         hBox2.getChildren().addAll(grid);
                                         hBox.getChildren().addAll(hBox1, hBox2);

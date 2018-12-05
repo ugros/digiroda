@@ -25,6 +25,9 @@ import static digiroda.DigiMenuListener.MENU_LOGS;
 import static digiroda.DigiMenuListener.MENU_QUIT;
 import static digiroda.DigiMenuListener.MENU_SETTINGS;
 import static digiroda.DigiMenuListener.MENU_SHOWCONTACTS;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -32,6 +35,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -102,6 +106,7 @@ public class DigiController implements Initializable {
     final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 	// Logger is an API for logging what you/ want
     static String lg; 															// The logger's filename
     public boolean isLogStored = false;
+    private boolean external=false;
     //</editor-fold>
     
     public void readProperties() {
@@ -117,9 +122,17 @@ public class DigiController implements Initializable {
             language.load(input);
  
 
-            
-            input2 = loader.getResourceAsStream("resources/config.properties");           
-            config.load(input2);
+            File f=new File("./config.xml");
+            if (f.exists()) 
+            {
+            	FileInputStream in=new FileInputStream(f);
+                config.loadFromXML(in); 
+                external=true;                
+            } else {
+                //f.createNewFile();
+            	input2 = loader.getResourceAsStream("resources/config.properties");           
+            	config.load(input2);            	
+            }
             
         } catch (IOException e) {
             USDialogs.error("ERROR", e.getMessage());
@@ -224,10 +237,15 @@ public class DigiController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {  
+    	
         readProperties();        
-        setLogger();      
+        setLogger();  
         LOGGER.log(Level.INFO,"Program started normally.");
-              
+        
+        if (external) 
+        	LOGGER.log(Level.FINE, "External settings are loaded from: config.xml"); 
+        else
+        	LOGGER.log(Level.FINE, "External settings are loaded from basic config.properties");
         
         user= new DigiUser(null,null);
         if (user.getChecked()) {            

@@ -121,18 +121,18 @@ class DigiMenuListener {
         return new EventHandler<TableColumn.CellEditEvent<Settings, String>>() {
             @Override
             public void handle(TableColumn.CellEditEvent<Settings, String> t) {
-                // ((Settings) t.getTableView().getItems().get(t.getTablePosition().getRow())).setKey(t.getNewValue());
+                ((Settings) t.getTableView().getItems().get(t.getTablePosition().getRow())).setValue(t.getNewValue());
                 String key = ((Settings) t.getTableView().getItems().get(t.getTablePosition().getRow())).getKey();
-                String value = ((Settings) t.getTableView().getItems().get(t.getTablePosition().getRow())).getValue();
+                String value = t.getNewValue();
                 try {
                     config.setProperty(key, value);
-                    File f=new File("x.xml");
+                    File f=new File("./config.xml");
                     if (!f.exists()) 
                         f.createNewFile();
                     OutputStream os=new FileOutputStream(f);
                     config.storeToXML(os, "Beállítások");
                 } catch (IOException ex) {
-                    Logger.getLogger(DigiMenuListener.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.log(Level.SEVERE, ex.getMessage());
                 } 
             }
         };

@@ -17,17 +17,20 @@
 //</editor-fold>
 package digiroda;
 
-import static digiroda.DigiController.LOGGER;
 import static digiroda.DigiController.language;
 import static digiroda.DigiController.user;
+import static digiroda.DigiController.LOGGER;
+
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
+
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableColumn;
 import ussoft.USDialogs;
+
 
 /**
  *
@@ -49,12 +52,16 @@ public class DigiHandlers {
             @Override
             public void handle(Event event) {
                 if (event.getEventType().getName().equals("MOUSE_CLICKED")) {
-                    try {
-                        //USDialogs.warning(fileEntry.getPath(),"RÁKATTINTOTTÁL, INNEN MÁR MINDEN OK");
-                        Desktop.getDesktop().open(fileEntry);
-                    } catch (IOException ex) {
-                        LOGGER.log(Level.SEVERE, ex.getMessage());
-                    }
+                    	if( Desktop.isDesktopSupported() )
+                    	{   
+                    		new Thread(() -> {
+                    	            try {
+										Desktop.getDesktop().browse( fileEntry.toURI()  );
+									} catch (IOException e) {
+										LOGGER.log(Level.SEVERE, e.getMessage());
+									}
+                    	       }).start();
+                    	}
                 }
             }
         };

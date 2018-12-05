@@ -96,7 +96,7 @@ public class DigiController implements Initializable {
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
     static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem5, treeItem11, treeItem12;
     final static Properties language = new Properties();
-    final static Properties config = new Properties();
+    public final static Properties config = new Properties();
     static DigiUser user=null;
     public static Level loggerLevel; 						// This is for set up logging level. Use "normal" in "_logLevel" to set up normal level.
     final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); 	// Logger is an API for logging what you/ want

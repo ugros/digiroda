@@ -19,62 +19,61 @@ package digiroda;
 
 import static digiroda.DigiController.LOGGER;
 import static digiroda.DigiController.cleanAnchorPane;
-import static digiroda.DigiController.user;
+import static digiroda.DigiController.cleanScrollPane;
+import static digiroda.DigiController.cleanStackPane;
 import static digiroda.DigiController.config;
 import static digiroda.DigiController.contactsSplitP;
 import static digiroda.DigiController.contactsTable;
 import static digiroda.DigiController.dataP;
 import static digiroda.DigiController.filterT;
 import static digiroda.DigiController.language;
-import static digiroda.DigiController.cleanScrollPane;
-import static digiroda.DigiController.cleanStackPane;
+import static digiroda.DigiController.user;
 
-import java.util.logging.Level;
-import java.util.function.Predicate;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.control.TreeItem;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
-import java.io.File;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
-
+import java.io.File;
 import java.io.FileFilter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import ussoft.USDialogs;
 
 /**
@@ -83,11 +82,9 @@ import ussoft.USDialogs;
  */
 class DigiMenuListener {
 
-    private int counter = 0;
     private File[] fileList;
     private Integer width;
     private GridPane gridPane;
-    private ProgressBar pb;
     private ImageView imageView;
 
     //<editor-fold defaultstate="collapsed" desc="Declaration of menu's constants">
@@ -111,6 +108,8 @@ class DigiMenuListener {
     final static String COLUMN_POSTALCODE = language.getProperty("COLUMN_POSTALCODE");
     final static String COLUMN_ADRESS = language.getProperty("COLUMN_ADRESS");
     //</editor-fold>
+    final static String TEXT_NOTALLOWED_HEAD=language.getProperty("TEXT_NOTALLOWED_HEAD");
+    final static String TEXT_NOTALLOWED_TEXT=language.getProperty("TEXT_NOTALLOWED_TEXT");
 
     static String readFile(String path, Charset encoding)
             throws IOException {
@@ -333,8 +332,11 @@ class DigiMenuListener {
                     //<editor-fold defaultstate="collapsed" desc="MENU_LOGS">
                     if (user.checkRight("checklog")) {
                         WebView webView = new WebView();
+                        //System.out.println('1');
                         final WebEngine webEngine = webView.getEngine();
+                        //System.out.println('2');
                         FileChooser fileChooser = new FileChooser();
+                        //System.out.println('3');
                         fileChooser.setTitle(language.getProperty("TITLE_LOG"));
                         fileChooser.setInitialDirectory(new File(config.getProperty("LOGDIR")));
                         fileChooser.getExtensionFilters().add(new ExtensionFilter("Naplófájlok", "*.log"));
@@ -357,6 +359,7 @@ class DigiMenuListener {
                         }
                     } else {
                         LOGGER.log(Level.WARNING, user.getUserName() + " tried to check log files.");
+                        USDialogs.warning(TEXT_NOTALLOWED_HEAD, TEXT_NOTALLOWED_TEXT);
                     }
                     //</editor-fold>
                 } else if (selected.equals(MENU_ARRIVE)) {
@@ -398,10 +401,11 @@ class DigiMenuListener {
                             for (File file : fileList) {
                                 try {
                                     BufferedImage bufferedImge;
-                                    try (PDDocument document = PDDocument.load(file)) {
+                                    
+                                    	PDDocument document = PDDocument.load(file);
                                         PDFRenderer renderer = new PDFRenderer(document);
                                         bufferedImge = renderer.renderImage(0);
-                                    }
+                                    
                                     Image image = SwingFXUtils.toFXImage(bufferedImge, null);
                                     Float ratio = width / (float) image.getWidth();
 
@@ -427,15 +431,11 @@ class DigiMenuListener {
                                         ToggleGroup tg = new ToggleGroup();
                                         int i;
                                         for (i = 0; i < radioButtons.size(); i++) {
-                                            //HBox h=new HBox();
                                             RadioButton rb = new RadioButton(radioButtons.get(i));
                                             rb.setMinWidth(150);
                                             rb.setMaxWidth(150);
-                                            //h.getChildren().add(rb);
-                                            // h.getStyleClass().add("box");
                                             rb.setToggleGroup(tg);
                                             grid.add(rb, 0, i);
-                                            System.out.println(radioButtons.get(i));
                                         }
 
                                         grid.add(btn, 0, i + 1);

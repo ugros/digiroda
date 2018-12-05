@@ -16,9 +16,11 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
+import static digiroda.DigiController.config;
+
 public class USLogger extends Logger {
     
-    static File directory = new File("./LOG");
+    static File directory = new File(config.getProperty("LOGDIR"));
     static private FileHandler fileHTML;
     static private Formatter formatterHTML;
     static private String fileName;

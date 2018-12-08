@@ -52,6 +52,21 @@ import javafx.scene.control.ToggleGroup;
  *
  */
 public class DigiDB {
+    
+    class StringAndId {
+        private String text;
+        private Integer id;
+        public StringAndId(String text, Integer id) {
+            this.text=text;
+            this.id=id;
+        }
+        public String getText() {
+            return this.text;
+        }
+        public Integer getId() {
+            return this.id;
+        }
+    }
 
     private final  String[] checkList = {"digidb", "digischema", "files", "companies", "contactpersons", "rights", "userrights", "users", "divisions"};
     private final Connection localDB;
@@ -190,9 +205,9 @@ public class DigiDB {
         }
     }
     
-    public List<String> getRadioButtonsOFDivisions() {
-        List<String> radioButtons = new ArrayList<>();
-        String sql = "SELECT users.familyname, users.firstname, divisions.name as division"
+    public List<StringAndId> getRadioButtonsOFDivisions() {
+        List<StringAndId> radioButtons = new ArrayList<>();
+        String sql = "SELECT users.id, users.familyname, users.firstname, divisions.name as division"
                 + " FROM digischema.users, digischema.divisions "
                 + " WHERE users.id=divisions.bossid;";
         ToggleGroup toggleGroup = new ToggleGroup();
@@ -201,8 +216,9 @@ public class DigiDB {
             PreparedStatement st = getMainDB().prepareStatement(sql);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                radioButtons.add(rs.getString("division")+"\n"
-                      +rs.getString("familyname")+" "+rs.getString("firstname"));
+                radioButtons.add(new StringAndId(rs.getString("division")+"\n"
+                      +rs.getString("familyname")+" "+rs.getString("firstname"),
+                        rs.getInt("id")));
                 //(new RadioButton(rs.getString("division")+"</br>"
                 //        +rs.getString("familyname")+" "+rs.getString("firstname"))).setToggleGroup(toggleGroup);
             }
@@ -210,6 +226,35 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, "Error while reading divisions: " + ex.getMessage());
         }
         return radioButtons;
+    }
+    
+    public void storeInArchive(String fileName, String timeStamp, Integer userId) {
+        try {
+            String sql = "INSERT INTO digischema.archive("
+                + "	\"timestamp\", filename)"
+                + "	VALUES (?, ?);";
+        
+            PreparedStatement st = getMainDB().prepareStatement(sql);
+            st.setString(1, timeStamp);
+            st.setString(2, fileName);
+            st.executeUpdate();
+            
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error while stored "+fileName+" in archive: "+ ex.getMessage());
+        }
+        /*try {
+            String sql = "INSERT INTO digischema.archive("
+                + "	\"timestamp\", filename)"
+                + "	VALUES (?, ?);";
+        
+            PreparedStatement st = getMainDB().prepareStatement(sql);
+            st.setString(0, timeStamp);
+            st.setString(1, fileName);
+            st.executeUpdate(sql);
+            
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error while stored "+fileName+" in archive: "+ ex.getMessage());
+        }*/
     }
 
     /**

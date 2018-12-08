@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -70,6 +71,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -86,9 +88,10 @@ import ussoft.USDialogs;
 class DigiMenuListener {
 
     private File[] fileList;
-    private Integer width;
+    private Double width;
     private GridPane gridPane;
     private ImageView imageView;
+    private Integer cols;
 
     //<editor-fold defaultstate="collapsed" desc="Declaration of menu's constants">
     final static String MENU = language.getProperty("MENU");
@@ -99,6 +102,7 @@ class DigiMenuListener {
     final static String MENU_SHOWCONTACTS = language.getProperty("MENU_SHOWCONTACTS");
     final static String MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
     final static String MENU_ARRIVE = language.getProperty("MENU_ARRIVE");
+    final static String MENU_CALENDAR = language.getProperty("MENU_CALENDAR");
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
     final static String COLUMN_COMPANYNAME = language.getProperty("COLUMN_COMPANYNAME");
@@ -110,11 +114,15 @@ class DigiMenuListener {
     final static String COLUMN_CITY = language.getProperty("COLUMN_CITY");
     final static String COLUMN_POSTALCODE = language.getProperty("COLUMN_POSTALCODE");
     final static String COLUMN_ADRESS = language.getProperty("COLUMN_ADRESS");
+    //</editor-fold>     
+    //<editor-fold defaultstate="collapsed" desc="Other constants">
     final static String TEXT_NOTALLOWED_HEAD=language.getProperty("TEXT_NOTALLOWED_HEAD");
     final static String TEXT_NOTALLOWED_TEXT=language.getProperty("TEXT_NOTALLOWED_TEXT");
+    final static String ARCHIVE1=config.getProperty("ARCHIVE1");
+    final static String ARCHIVE2=config.getProperty("ARCHIVE2");
     //</editor-fold>
-    static String readFile(String path, Charset encoding)
-            throws IOException {
+    
+    static String readFile(String path, Charset encoding) throws IOException {            
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
     }
@@ -375,8 +383,12 @@ class DigiMenuListener {
                     vBox.getStyleClass().add("vbox");
                     gridPane = new GridPane();
                     gridPane.getStyleClass().add("gridpane");
-
-                    width = Integer.parseInt(config.getProperty("PREVIEW_WIDTH"));
+                    
+                    cols= Integer.parseInt(config.getProperty("PREVIEW_COLUMNS"));  
+                    if (cols>4) cols=4; 
+                        else if (cols<1) cols=1;
+                    Double fullWidth=cleanScrollPane.getWidth();
+                    width= (fullWidth/cols)-195;
                     final File directory = new File(config.getProperty("READFROM"));
 
                     fileList = directory.listFiles(new FileFilter() {
@@ -397,53 +409,84 @@ class DigiMenuListener {
 
                     Task<Void> longRunningTask = new Task<Void>() {
                         private int counter;
-                        private List<String> radioButtons = user.getConnects().getRadioButtonsOFDivisions();
+                        private List<DigiDB.StringAndId> radioButtons = user.getConnects().getRadioButtonsOFDivisions();
 
                         @Override
                         protected Void call() throws Exception {
-                        	Double fullWidth=cleanScrollPane.getWidth();
+
                             for (File file : fileList) {
                                 try {
                                     BufferedImage bufferedImge;
                                     
-                                	PDDocument document = PDDocument.load(file);
+                                    PDDocument document = PDDocument.load(file);
                                     PDFRenderer renderer = new PDFRenderer(document);
                                     bufferedImge = renderer.renderImage(0);
-                                        
+                                    document.close();
                                     
                                     Image image = SwingFXUtils.toFXImage(bufferedImge, null);
-                                    Float ratio = width / (float) image.getWidth();
+                                    Double ratio =  width / image.getWidth();
 
                                     imageView = new ImageView();
                                     imageView = new ImageView();
                                     imageView.setImage(image);
                                     imageView.setFitWidth(width);
                                     imageView.setFitHeight(ratio * image.getHeight());
-                                    Double cols=(Double) fullWidth/(width+170);
-
+                                    
                                     Platform.runLater(() -> {
-
                                         HBox hBox = new HBox();
                                         HBox hBox1 = new HBox();
                                         HBox hBox2 = new HBox();
-
                                         hBox1.getChildren().addAll(imageView);
                                         hBox1.getStyleClass().add("img");
                                         GridPane grid = new GridPane();
                                         grid.getStyleClass().add("radiobuttons");
                                         Button btn = new Button("Érkeztet");
-                                        //btn.getStyleClass().add("btn");
-                                        //btn.setId("xxx");
-                                        ToggleGroup tg = new ToggleGroup();
+                                        class PreViewGroup extends ToggleGroup {
+                                            public File file;
+                                            public PreViewGroup(File file) {
+                                                super();
+                                                this.file=file;
+                                            }
+                                        }
+                                        PreViewGroup tg = new PreViewGroup(file);
                                         int i;
                                         for (i = 0; i < radioButtons.size(); i++) {
-                                            RadioButton rb = new RadioButton(radioButtons.get(i));
+                                            RadioButton rb = new RadioButton(radioButtons.get(i).getText());
                                             rb.setMinWidth(150);
                                             rb.setMaxWidth(150);
+                                            rb.setUserData(radioButtons.get(i).getId());
                                             rb.setToggleGroup(tg);
                                             grid.add(rb, 0, i);
                                         }
-
+                                        btn.setOnMousePressed(new EventHandler<MouseEvent>() {
+                                            @Override
+                                            public void handle(MouseEvent mouseEvent) {
+                                                if (mouseEvent.isPrimaryButtonDown() && tg.getSelectedToggle()!=null) {
+//                                                    System.out.println(tg.file.getAbsolutePath());
+//                                                    System.out.println(tg.getSelectedToggle().getUserData().toString());
+                                                    
+                                                    String timeStamp=""+System.currentTimeMillis();
+                                                        File f= new File(ARCHIVE1);
+                                                        if (!f.exists()) f.mkdir();
+                                                        f=new File(ARCHIVE1+"/"+timeStamp+".dg");
+                                                        tg.file.renameTo(f);
+                                                        f= new File(ARCHIVE2);
+                                                        if (!f.exists()) f.mkdir();
+                                                        f=new File(ARCHIVE2+"/"+timeStamp+".dg");
+                                                        tg.file.renameTo(f);
+                                                    user.getConnects().storeInArchive(
+                                                            tg.file.getName(), 
+                                                            timeStamp, 
+                                                            Integer.parseInt(tg.getSelectedToggle().getUserData().toString()));
+                                                    
+                                                    hBox.setVisible(false);
+                                                    hBox.getChildren().clear();
+                                                    hBox.setStyle("-fx-border-insets:0px; -fx-background-insets:0px; -fx-padding:0;");
+                                                    LOGGER.log(Level.INFO, f.getAbsolutePath()+" is stored.");
+                                                }
+                                            }
+                                        });
+                                       
                                         grid.add(btn, 0, i + 1);
 
                                         hBox2.getChildren().addAll(grid);
@@ -454,7 +497,7 @@ class DigiMenuListener {
                                         hBox1.addEventFilter(EventType.ROOT, DigiHandlers.clickOnPDFPreview(file));
 
                                         hBox2.getStyleClass().add("hbox2");
-                                        gridPane.add(hBox, counter % cols.intValue(), ((Integer) counter / cols.intValue()));
+                                        gridPane.add(hBox, counter % cols, ((Integer) counter / cols));
                                         counter++;
 
                                     });
@@ -469,7 +512,20 @@ class DigiMenuListener {
                     };
                     new Thread(longRunningTask).start();
                     //</editor-fold>
-                } else if (selected.equals(MENU_QUIT)) {
+                } else if (selected.equals(MENU_CALENDAR)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_CALENDAR">
+                    contactsSplitP.setVisible(false);
+                    cleanAnchorPane.setVisible(false);
+                    cleanStackPane.setVisible(false);
+                    cleanScrollPane.setVisible(true);
+
+                    VBox vBox = new VBox();
+                    vBox.getStyleClass().add("vbox");
+                    DigiCalendar calendar=new DigiCalendar(YearMonth.now());
+                    vBox.getChildren().add(calendar.getView());
+                    cleanScrollPane.setContent(vBox);
+                    //</editor-fold>
+                }else if (selected.equals(MENU_QUIT)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_QUIT">
                     LOGGER.log(Level.INFO, "Program terminated.");
                     user.getConnects().close();

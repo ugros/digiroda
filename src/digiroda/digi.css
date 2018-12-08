@@ -23,10 +23,6 @@ limitations under the License.
     -fx-padding: 5;  
 }
 
-.gridpane {
-    -fx-vgap: 10px;
-    -fx-hgap: 10px;
-}
 
 .radiobuttons {
     -fx-vgap: 10px; 
@@ -71,6 +67,8 @@ limitations under the License.
     -fx-border-color: teal;
     -fx-border-radius: 5;    
     -fx-padding: 5;  
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
 }
 
 .hbox1 {
@@ -93,7 +91,7 @@ limitations under the License.
     -fx-padding: 5 5 5 0;  
 }
 
-.button {
+.button2 {
     -fx-background-color: 
         linear-gradient(#ffd65b, #e68400),
         linear-gradient(#ffef84, #f2ba44),
@@ -106,6 +104,22 @@ limitations under the License.
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,1 ), 15, 0, 0, 0);
+}
+.button {
+    -fx-background-color: 
+        rgba(0,0,0,0.08),
+        linear-gradient(#5a61af, #51536d),
+        linear-gradient(#e4fbff 0%,#cee6fb 10%, #a5d3fb 50%, #88c6fb 51%, #d5faff 100%);
+    -fx-border-style: solid;
+    -fx-border-color: teal;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5,5,4;
+    -fx-padding: 3 30 3 30;
+    -fx-text-fill: #242d35;
+    -fx-font-size: 14px;   
+    -fx-border-insets: 20px;
+    -fx-background-insets: 20px;
+    
 }
 
 .button:hover {

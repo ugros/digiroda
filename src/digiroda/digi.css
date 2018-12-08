@@ -20,6 +20,7 @@ limitations under the License.
 
 .vbox {
     -fx-text-fill: rgb(49, 89, 23);
+    -fx-padding: 5;  
 }
 
 .gridpane {
@@ -69,10 +70,10 @@ limitations under the License.
     -fx-text-fill: rgb(49, 89, 23);
     -fx-border-color: teal;
     -fx-border-radius: 5;    
+    -fx-padding: 5;  
 }
 
 .hbox1 {
-    -fx-text-fill: green;
     -fx-border-radius: 5;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
     -fx-padding: 5;  

@@ -59,8 +59,11 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -107,10 +110,9 @@ class DigiMenuListener {
     final static String COLUMN_CITY = language.getProperty("COLUMN_CITY");
     final static String COLUMN_POSTALCODE = language.getProperty("COLUMN_POSTALCODE");
     final static String COLUMN_ADRESS = language.getProperty("COLUMN_ADRESS");
-    //</editor-fold>
     final static String TEXT_NOTALLOWED_HEAD=language.getProperty("TEXT_NOTALLOWED_HEAD");
     final static String TEXT_NOTALLOWED_TEXT=language.getProperty("TEXT_NOTALLOWED_TEXT");
-
+    //</editor-fold>
     static String readFile(String path, Charset encoding)
             throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
@@ -281,39 +283,41 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_SETTINGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
-                    cleanScrollPane.setVisible(false);
                     cleanAnchorPane.setVisible(false);
                     cleanStackPane.setVisible(false);
-                    contactsSplitP.setVisible(true);
-                    contactsTable.getColumns().clear();
+                    contactsSplitP.setVisible(false);
+                    cleanScrollPane.setVisible(true);
+                    VBox vBox=new VBox();
+                    TableView table = new TableView();
                    
                     ObservableList<Settings> tableList = FXCollections.observableArrayList();
                     config.forEach((key, value) -> {
-                        //System.out.println("Key : " + key + " Value : " + value);
                         tableList.add(new Settings((String)key,(String)value));
                     });
-
-                    TableColumn colKey = new TableColumn("Változó");
+                    
+                    TableColumn colKey = new TableColumn(language.getProperty("COLUMN_KEY"));
                     colKey.setMinWidth(150);
                     colKey.setCellFactory(TextFieldTableCell.forTableColumn());
                     colKey.setCellValueFactory(new PropertyValueFactory<>("key"));
                     colKey.setOnEditCommit(colKeyCommit());
 
-                    TableColumn colValue = new TableColumn("Érték");
+                    TableColumn colValue = new TableColumn(language.getProperty("COLUMN_VALUE"));
                     colValue.setMinWidth(150);
                     colValue.setCellFactory(TextFieldTableCell.forTableColumn());
                     colValue.setCellValueFactory(new PropertyValueFactory<>("value"));
-                    colValue.setOnEditCommit(colValueCommit());                    
+                    colValue.setOnEditCommit(colValueCommit());   
                     
-                    contactsTable.getColumns().addAll(colKey,colValue);
-                    contactsTable.setEditable(true);
+                    table.getColumns().addAll(colKey,colValue);
+                    table.setEditable(true);
+                    Label label=new Label(language.getProperty("TEXT_FILTER"));
+                    TextField filter=new TextField();
                     FilteredList<Settings> filteredList = new FilteredList<>(tableList);
-                    filterT.textProperty().addListener((observable2, oldValue2, newValue2) -> {
+                    filter.textProperty().addListener((observable2, oldValue2, newValue2) -> {
                         filteredList.setPredicate(
                                 new Predicate<Settings>() {
                             public boolean test(Settings t) {
-                                if (t.getKey().toUpperCase().contains(filterT.getText().toUpperCase())
-                                        || t.getValue().toUpperCase().contains(filterT.getText().toUpperCase())) {
+                                if (t.getKey().toUpperCase().contains(filter.getText().toUpperCase())
+                                        || t.getValue().toUpperCase().contains(filter.getText().toUpperCase())) {
                                     return true;
                                 } else {
                                     return false;
@@ -321,25 +325,23 @@ class DigiMenuListener {
                             }
                         });
                     });
-
-                    contactsTable.setItems(filteredList);
-                   /* contactsTable.blendModeProperty();
-
-                    contactsTable.minWidthProperty().bind(dataP.widthProperty());
-                    contactsTable.maxWidthProperty().bind(dataP.widthProperty());*/
+                    table.setItems(filteredList);
+                    HBox hBox=new HBox();
+                    hBox.getChildren().addAll(label,filter);
+                    vBox.getChildren().addAll(hBox,table);
+                    hBox.getStyleClass().add("hbox");
+                    vBox.getStyleClass().add("vbox");
+                    cleanScrollPane.setContent(vBox);
                     //</editor-fold>
                 } else if (selected.equals(MENU_LOGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_LOGS">
                     if (user.checkRight("checklog")) {
                         WebView webView = new WebView();
-                        //System.out.println('1');
                         final WebEngine webEngine = webView.getEngine();
-                        //System.out.println('2');
                         FileChooser fileChooser = new FileChooser();
-                        //System.out.println('3');
                         fileChooser.setTitle(language.getProperty("TITLE_LOG"));
                         fileChooser.setInitialDirectory(new File(config.getProperty("LOGDIR")));
-                        fileChooser.getExtensionFilters().add(new ExtensionFilter("Naplófájlok", "*.log"));
+                        fileChooser.getExtensionFilters().add(new ExtensionFilter(language.getProperty("TEXT_LOGFILES"), "*.log"));
                         File f = fileChooser.showOpenDialog(null);
                         if (f != null) {
                             try {
@@ -391,6 +393,7 @@ class DigiMenuListener {
 
                     vBox.getChildren().addAll(gridPane);
                     cleanScrollPane.setContent(vBox);
+                    
 
                     Task<Void> longRunningTask = new Task<Void>() {
                         private int counter;
@@ -398,13 +401,15 @@ class DigiMenuListener {
 
                         @Override
                         protected Void call() throws Exception {
+                        	Double fullWidth=cleanScrollPane.getWidth();
                             for (File file : fileList) {
                                 try {
                                     BufferedImage bufferedImge;
                                     
-                                    	PDDocument document = PDDocument.load(file);
-                                        PDFRenderer renderer = new PDFRenderer(document);
-                                        bufferedImge = renderer.renderImage(0);
+                                	PDDocument document = PDDocument.load(file);
+                                    PDFRenderer renderer = new PDFRenderer(document);
+                                    bufferedImge = renderer.renderImage(0);
+                                        
                                     
                                     Image image = SwingFXUtils.toFXImage(bufferedImge, null);
                                     Float ratio = width / (float) image.getWidth();
@@ -414,6 +419,7 @@ class DigiMenuListener {
                                     imageView.setImage(image);
                                     imageView.setFitWidth(width);
                                     imageView.setFitHeight(ratio * image.getHeight());
+                                    Double cols=(Double) fullWidth/(width+170);
 
                                     Platform.runLater(() -> {
 
@@ -448,7 +454,7 @@ class DigiMenuListener {
                                         hBox1.addEventFilter(EventType.ROOT, DigiHandlers.clickOnPDFPreview(file));
 
                                         hBox2.getStyleClass().add("hbox2");
-                                        gridPane.add(hBox, counter % 2, ((Integer) counter / 2));
+                                        gridPane.add(hBox, counter % cols.intValue(), ((Integer) counter / cols.intValue()));
                                         counter++;
 
                                     });

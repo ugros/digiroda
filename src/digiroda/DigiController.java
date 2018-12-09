@@ -26,6 +26,8 @@ import static digiroda.DigiMenuListener.MENU_QUIT;
 import static digiroda.DigiMenuListener.MENU_SETTINGS;
 import static digiroda.DigiMenuListener.MENU_SHOWCONTACTS;
 import static digiroda.DigiMenuListener.MENU_CALENDAR;
+import static digiroda.DigiMenuListener.MENU_OPTIONS;
+import static digiroda.DigiMenuListener.MENU_USERS;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -99,7 +101,7 @@ public class DigiController implements Initializable {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
-    static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem5, treeItem6, treeItem11, treeItem12;
+    static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem43, treeItem5, treeItem31, treeItem32, treeItem41, treeItem42;
     final static Properties language = new Properties();
     public final static Properties config = new Properties();
     static DigiUser user=null;
@@ -162,22 +164,24 @@ public class DigiController implements Initializable {
         rootItem = new TreeItem<>(MENU);
         TreeView<String> treeView = new TreeView<>(rootItem);
         treeView.setShowRoot(true);
-        treeItem1 = new TreeItem<>(MENU_CONTACTS);        
-            treeItem11 = new TreeItem<>(MENU_SHOWCONTACTS);
-            treeItem12 = new TreeItem<>(MENU_EXPORT);
-            treeItem1.getChildren().addAll(treeItem11, treeItem12);  
-            
-        treeItem2= new TreeItem<>(MENU_SETTINGS);
+        treeItem1 = new TreeItem<>(MENU_ARRIVE);
         
-        treeItem3= new TreeItem<>(MENU_LOGS);
+        treeItem2 = new TreeItem<>(MENU_CALENDAR); 
         
-        treeItem4 = new TreeItem<>(MENU_ARRIVE);
+        treeItem3 = new TreeItem<>(MENU_CONTACTS);        
+            treeItem31 = new TreeItem<>(MENU_SHOWCONTACTS);
+            treeItem32 = new TreeItem<>(MENU_EXPORT);
+            treeItem3.getChildren().addAll(treeItem31, treeItem32);  
         
-        treeItem5 = new TreeItem<>(MENU_CALENDAR);
+        treeItem4= new TreeItem<>(MENU_SETTINGS);
+            treeItem41=new TreeItem<>(MENU_OPTIONS);
+            treeItem42=new TreeItem<>(MENU_USERS);
+            treeItem43= new TreeItem<>(MENU_LOGS);
+        treeItem4.getChildren().addAll(treeItem41, treeItem42, treeItem43);  
         
-        treeItem6 = new TreeItem<>(MENU_QUIT);
+        treeItem5 = new TreeItem<>(MENU_QUIT);
         
-        rootItem.getChildren().addAll(treeItem1, treeItem2, treeItem3, treeItem4,treeItem5,treeItem6);
+        rootItem.getChildren().addAll(treeItem1, treeItem2, treeItem3, treeItem4, treeItem5);
         menuPane.getChildren().add(treeView);
         
         digiroda.DigiController.rootItem.setExpanded(true);

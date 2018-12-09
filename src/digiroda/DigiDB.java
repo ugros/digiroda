@@ -219,8 +219,6 @@ public class DigiDB {
                 radioButtons.add(new StringAndId(rs.getString("division")+"\n"
                       +rs.getString("familyname")+" "+rs.getString("firstname"),
                         rs.getInt("id")));
-                //(new RadioButton(rs.getString("division")+"</br>"
-                //        +rs.getString("familyname")+" "+rs.getString("firstname"))).setToggleGroup(toggleGroup);
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while reading divisions: " + ex.getMessage());
@@ -229,8 +227,9 @@ public class DigiDB {
     }
     
     public void storeInArchive(String fileName, String timeStamp, Integer userId) {
+        String sql="";
         try {
-            String sql = "INSERT INTO digischema.archive("
+            sql = "INSERT INTO digischema.archive("
                 + "	\"timestamp\", filename)"
                 + "	VALUES (?, ?);";
         
@@ -238,23 +237,28 @@ public class DigiDB {
             st.setString(1, timeStamp);
             st.setString(2, fileName);
             st.executeUpdate();
-            
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error while stored "+fileName+" in archive: "+ ex.getMessage());
-        }
-        /*try {
-            String sql = "INSERT INTO digischema.archive("
-                + "	\"timestamp\", filename)"
-                + "	VALUES (?, ?);";
         
-            PreparedStatement st = getMainDB().prepareStatement(sql);
-            st.setString(0, timeStamp);
-            st.setString(1, fileName);
-            st.executeUpdate(sql);
-            
+            sql = " SELECT id from digischema.archive where \"timestamp\"='"+timeStamp+"';";
+            PreparedStatement st1 = getMainDB().prepareStatement(sql);
+            ResultSet rs = st1.executeQuery();
+            Integer id;
+            while (rs.next()) {
+                id=rs.getInt("id");
+                sql = "INSERT INTO digischema.flows(" +
+                        "	userid, docid, status, \"timestamp\")" +
+                        "	VALUES (?, ?, ?, ?);";
+        
+                PreparedStatement st2 = getMainDB().prepareStatement(sql);
+                st2.setInt(1, userId);
+                st2.setInt(2, id);
+                st2.setInt(3, 1);
+                st2.setString(4, timeStamp);
+                st2.executeUpdate();
+            }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while stored "+fileName+" in archive: "+ ex.getMessage());
-        }*/
+            USDialogs.warning(language.getProperty("TEXT_NOTSTORED_HEAD"), language.getProperty("TEXT_NOTSTORED_TEXT"));
+        }
     }
 
     /**
@@ -279,11 +283,14 @@ public class DigiDB {
                 return true;
             } else {
                 LOGGER.log(Level.SEVERE, "The main database, schema or tables don't exist.");
+                USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"),language.getProperty("TEXT_MAINERROR_TEXT"));
             }
 
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while checked main database and its tables: " + ex.getMessage());
+            USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"),language.getProperty("TEXT_MAINERROR_TEXT"),ex.getMessage());
         }
+        
         return false;
     }
 

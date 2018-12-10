@@ -39,6 +39,7 @@ import static digiroda.DigiController.language;
 import static digiroda.DigiController.config;
 import static digiroda.DigiController.user;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -147,13 +148,10 @@ public class DigiDB {
 
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "SQL error while setting up main database: </br>" + ex.getMessage());
-            /*} catch (InstantiationException ex) {
-                LOGGER.log(Level.SEVERE, "InstantiationException while setting up main database: </br>"+ex.getMessage());
-        } catch (IllegalAccessException ex) {
-                LOGGER.log(Level.SEVERE, "Illegal access while setting up main database: </br>"+ex.getMessage());
-                USDialogs.error(language.getProperty("LOGINERROR"), ex.getMessage());*/
+            USDialogs.warning(language.getProperty("DATABASE_ERROR_TITLE"), ex.getMessage());
         } catch (ClassNotFoundException ex) {
             LOGGER.log(Level.SEVERE, "Class not found while setting up main database: </br>" + ex.getMessage());
+            USDialogs.warning(language.getProperty("DATABASE_ERROR_TITLE"), ex.getMessage());
         }
         return null;
     }
@@ -205,6 +203,11 @@ public class DigiDB {
         }
     }
     
+    /**
+     * This function returned with a list of string and id's list
+     * for radiobuttons in arrive's panel
+     *
+     */
     public List<StringAndId> getRadioButtonsOFDivisions() {
         List<StringAndId> radioButtons = new ArrayList<>();
         String sql = "SELECT users.id, users.familyname, users.firstname, divisions.name as division"
@@ -226,7 +229,11 @@ public class DigiDB {
         return radioButtons;
     }
     
-    public void storeInArchive(String fileName, String timeStamp, Integer userId) {
+    /**
+     * This method makes arrived a documentum, stores in archive and creates first step of flow.
+     *     
+     */
+    public void storeInArchive(String fileName, Timestamp timeStamp, Integer userId) {
         String sql="";
         try {
             sql = "INSERT INTO digischema.archive("
@@ -234,7 +241,7 @@ public class DigiDB {
                 + "	VALUES (?, ?);";
         
             PreparedStatement st = getMainDB().prepareStatement(sql);
-            st.setString(1, timeStamp);
+            st.setTimestamp(1, timeStamp);
             st.setString(2, fileName);
             st.executeUpdate();
         
@@ -252,8 +259,9 @@ public class DigiDB {
                 st2.setInt(1, userId);
                 st2.setInt(2, id);
                 st2.setInt(3, 1);
-                st2.setString(4, timeStamp);
+                st2.setTimestamp(4, timeStamp);
                 st2.executeUpdate();
+               
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while stored "+fileName+" in archive: "+ ex.getMessage());

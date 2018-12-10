@@ -261,6 +261,7 @@ public class DigiController implements Initializable {
             root.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
         } else {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
+           USDialogs.warning(language.getProperty("DATABASE_ERROR_TITLE"), language.getProperty("USERCHECK_ERROR_TEXT"));
            user.getConnects().close();
            System.exit(1);
         }

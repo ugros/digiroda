@@ -117,8 +117,8 @@ limitations under the License.
     -fx-padding: 3 30 3 30;
     -fx-text-fill: #242d35;
     -fx-font-size: 14px;   
-    -fx-border-insets: 20px;
-    -fx-background-insets: 20px;
+    -fx-border-insets:10px;
+    -fx-background-insets: 10px;
     
 }
 
@@ -128,4 +128,12 @@ limitations under the License.
 
 .button:pressed {
      -fx-effect: dropshadow(three-pass-box, teal, 4, 0, 0, 0);
+}
+
+.padding10 {    
+    -fx-padding: 10;
+}
+
+.padding10right {
+    -fx-padding: 0 10 0 0;
 }

@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.function.Predicate;
@@ -101,6 +102,8 @@ class DigiMenuListener {
     final static String MENU_CONTACTS = language.getProperty("MENU_CONTACTS");
     final static String MENU_SHOWCONTACTS = language.getProperty("MENU_SHOWCONTACTS");
     final static String MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
+    final static String MENU_OPTIONS = language.getProperty("MENU_OPTIONS");
+    final static String MENU_USERS = language.getProperty("MENU_USERS");
     final static String MENU_ARRIVE = language.getProperty("MENU_ARRIVE");
     final static String MENU_CALENDAR = language.getProperty("MENU_CALENDAR");
     //</editor-fold>
@@ -141,6 +144,7 @@ class DigiMenuListener {
                         f.createNewFile();
                     OutputStream os=new FileOutputStream(f);
                     config.storeToXML(os, "Beállítások");
+                    LOGGER.log(Level.INFO, "User " + user.getUserName() + " edited options.");
                 } catch (IOException ex) {
                     LOGGER.log(Level.SEVERE, ex.getMessage());
                 } 
@@ -289,8 +293,12 @@ class DigiMenuListener {
                     contactsTable.maxWidthProperty().bind(dataP.widthProperty());
                     LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked contacts.");
                     //</editor-fold>
-                } else if (selected.equals(MENU_SETTINGS)) {
+                 } else if (selected.equals(MENU_SETTINGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
+                    digiroda.DigiController.treeItem2.setExpanded(true);
+                    //</editor-fold>  
+                } else if (selected.equals(MENU_OPTIONS)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_OPTIONS">
                     cleanAnchorPane.setVisible(false);
                     cleanStackPane.setVisible(false);
                     contactsSplitP.setVisible(false);
@@ -333,13 +341,18 @@ class DigiMenuListener {
                             }
                         });
                     });
-                    table.setItems(filteredList);
+                    table.setItems(filteredList);                    
                     HBox hBox=new HBox();
                     hBox.getChildren().addAll(label,filter);
                     vBox.getChildren().addAll(hBox,table);
                     hBox.getStyleClass().add("hbox");
                     vBox.getStyleClass().add("vbox");
+                    label.getStyleClass().add("padding10right");
                     cleanScrollPane.setContent(vBox);
+                    
+                    table.minWidthProperty().bind(cleanScrollPane.widthProperty());
+                    table.maxWidthProperty().bind(cleanScrollPane.widthProperty());
+                    LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked options.");
                     //</editor-fold>
                 } else if (selected.equals(MENU_LOGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_LOGS">
@@ -412,7 +425,7 @@ class DigiMenuListener {
                         private List<DigiDB.StringAndId> radioButtons = user.getConnects().getRadioButtonsOFDivisions();
 
                         @Override
-                        protected Void call() throws Exception {
+                        protected Void call() {
 
                             for (File file : fileList) {
                                 try {
@@ -422,7 +435,7 @@ class DigiMenuListener {
                                     PDFRenderer renderer = new PDFRenderer(document);
                                     bufferedImge = renderer.renderImage(0);
                                     document.close();
-                                    
+                                
                                     Image image = SwingFXUtils.toFXImage(bufferedImge, null);
                                     Double ratio =  width / image.getWidth();
 
@@ -431,7 +444,7 @@ class DigiMenuListener {
                                     imageView.setImage(image);
                                     imageView.setFitWidth(width);
                                     imageView.setFitHeight(ratio * image.getHeight());
-                                    
+                                   
                                     Platform.runLater(() -> {
                                         HBox hBox = new HBox();
                                         HBox hBox1 = new HBox();
@@ -462,27 +475,31 @@ class DigiMenuListener {
                                             @Override
                                             public void handle(MouseEvent mouseEvent) {
                                                 if (mouseEvent.isPrimaryButtonDown() && tg.getSelectedToggle()!=null) {
-//                                                    System.out.println(tg.file.getAbsolutePath());
-//                                                    System.out.println(tg.getSelectedToggle().getUserData().toString());
-                                                    
-                                                    String timeStamp=""+System.currentTimeMillis();
-                                                        File f= new File(ARCHIVE1);
+                                                    File f= new File(ARCHIVE1);
+                                                    try {
+                                                        Timestamp timeStamp=new Timestamp(System.currentTimeMillis());                                                        
                                                         if (!f.exists()) f.mkdir();
-                                                        f=new File(ARCHIVE1+"/"+timeStamp+".dg");
-                                                        tg.file.renameTo(f);
+                                                        f=new File(ARCHIVE1+"/"+timeStamp.getTime()+".dg");
+                                                        Files.copy(tg.file.toPath(), f.toPath());                                        
                                                         f= new File(ARCHIVE2);
                                                         if (!f.exists()) f.mkdir();
-                                                        f=new File(ARCHIVE2+"/"+timeStamp+".dg");
-                                                        tg.file.renameTo(f);
-                                                    user.getConnects().storeInArchive(
-                                                            tg.file.getName(), 
-                                                            timeStamp, 
-                                                            Integer.parseInt(tg.getSelectedToggle().getUserData().toString()));
-                                                    
-                                                    hBox.setVisible(false);
-                                                    hBox.getChildren().clear();
-                                                    hBox.setStyle("-fx-border-insets:0px; -fx-background-insets:0px; -fx-padding:0;");
-                                                    LOGGER.log(Level.INFO, f.getAbsolutePath()+" is stored.");
+                                                        f=new File(ARCHIVE2);
+                                                        if (!f.exists()) f.mkdir();
+                                                        f=new File(ARCHIVE2+"/"+timeStamp.getTime()+".dg");
+                                                        Files.copy(tg.file.toPath(), f.toPath());               
+                                                        user.getConnects().storeInArchive(
+                                                                tg.file.getName(), 
+                                                                timeStamp, 
+                                                                Integer.parseInt(tg.getSelectedToggle().getUserData().toString()));
+
+                                                        hBox.setVisible(false);
+                                                        hBox.getChildren().clear();
+                                                        hBox.setStyle("-fx-border-insets:0px; -fx-background-insets:0px; -fx-padding:0;");
+                                                        Files.delete(tg.file.toPath());               
+                                                        LOGGER.log(Level.INFO, f.getAbsolutePath()+" is stored.");
+                                                    } catch (IOException ex) {
+                                                        LOGGER.log(Level.SEVERE, f.getAbsolutePath()+" isn't stored: "+ex.getMessage());
+                                                    }
                                                 }
                                             }
                                         });
@@ -501,10 +518,11 @@ class DigiMenuListener {
                                         counter++;
 
                                     });
-
-                                } catch (IOException e) {
+                                    } catch (IOException e) {
                                     LOGGER.log(Level.SEVERE, e.getMessage());
-                                }
+                                } 
+
+
                             }
                             return null;
                         }

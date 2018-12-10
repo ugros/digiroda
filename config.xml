@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Beállítások</comment>
+<entry key="LOCALHOST">localhost</entry>
+<entry key="DBUSER">teszt</entry>
+<entry key="READFROM">c:/xxx</entry>
+<entry key="MAINDB">digidb</entry>
+<entry key="LOCALSCHEMA">DigiDB</entry>
+<entry key="ARCHIVE2">c:/xxx/x2</entry>
+<entry key="ARCHIVE1">c:/xxx/x1</entry>
+<entry key="DBPASSWORD">teszt</entry>
+<entry key="LOGLEVEL">Developer</entry>
+<entry key="LOGDIR">./.log</entry>
+<entry key="PREVIEW_COLUMNS">3</entry>
+<entry key="MAINHOST">localhost:5432</entry>
+</properties>

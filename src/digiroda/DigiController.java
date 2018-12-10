@@ -18,6 +18,7 @@
 package digiroda;
 
 import static digiroda.DigiMenuListener.MENU;
+import static digiroda.DigiMenuListener.MENU_ACTUALLOG;
 import static digiroda.DigiMenuListener.MENU_ARRIVE;
 import static digiroda.DigiMenuListener.MENU_CONTACTS;
 import static digiroda.DigiMenuListener.MENU_EXPORT;
@@ -101,7 +102,7 @@ public class DigiController implements Initializable {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
-    static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem43, treeItem5, treeItem31, treeItem32, treeItem41, treeItem42;
+    static TreeItem<String> rootItem, treeItem1, treeItem2, treeItem3, treeItem4, treeItem5, treeItem31, treeItem32, treeItem41, treeItem42, treeItem43, treeItem44 ;
     final static Properties language = new Properties();
     public final static Properties config = new Properties();
     static DigiUser user=null;
@@ -177,7 +178,8 @@ public class DigiController implements Initializable {
             treeItem41=new TreeItem<>(MENU_OPTIONS);
             treeItem42=new TreeItem<>(MENU_USERS);
             treeItem43= new TreeItem<>(MENU_LOGS);
-        treeItem4.getChildren().addAll(treeItem41, treeItem42, treeItem43);  
+            treeItem44= new TreeItem<>(MENU_ACTUALLOG);
+        treeItem4.getChildren().addAll(treeItem41, treeItem42, treeItem43, treeItem44);  
         
         treeItem5 = new TreeItem<>(MENU_QUIT);
         

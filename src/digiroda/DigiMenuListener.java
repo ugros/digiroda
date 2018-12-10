@@ -40,7 +40,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.YearMonth;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -97,6 +100,7 @@ class DigiMenuListener {
     //<editor-fold defaultstate="collapsed" desc="Declaration of menu's constants">
     final static String MENU = language.getProperty("MENU");
     final static String MENU_LOGS = language.getProperty("MENU_LOGS");
+    final static String MENU_ACTUALLOG = language.getProperty("MENU_ACTUALLOG");
     final static String MENU_QUIT = language.getProperty("MENU_QUIT");
     final static String MENU_EXPORT = language.getProperty("MENU_EXPORT");
     final static String MENU_CONTACTS = language.getProperty("MENU_CONTACTS");
@@ -198,7 +202,7 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_CONTACTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_CONTACTS">
-                    digiroda.DigiController.treeItem1.setExpanded(true);
+                    digiroda.DigiController.treeItem3.setExpanded(true);
                     //</editor-fold>
                 } else if (selected.equals(MENU_EXPORT)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_EXPORT">
@@ -295,7 +299,7 @@ class DigiMenuListener {
                     //</editor-fold>
                  } else if (selected.equals(MENU_SETTINGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
-                    digiroda.DigiController.treeItem2.setExpanded(true);
+                    digiroda.DigiController.treeItem4.setExpanded(true);
                     //</editor-fold>  
                 } else if (selected.equals(MENU_OPTIONS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_OPTIONS">
@@ -364,6 +368,36 @@ class DigiMenuListener {
                         fileChooser.setInitialDirectory(new File(config.getProperty("LOGDIR")));
                         fileChooser.getExtensionFilters().add(new ExtensionFilter(language.getProperty("TEXT_LOGFILES"), "*.log"));
                         File f = fileChooser.showOpenDialog(null);
+                        if (f != null) {
+                            try {
+                                //webEngine.load(f.toURI().toString());
+                                String content = readFile(f.getPath(), StandardCharsets.UTF_8);
+                                webView.getEngine().loadContent(content, "text/html");
+                                contactsSplitP.setVisible(false);
+                                cleanScrollPane.setVisible(false);
+                                cleanAnchorPane.setVisible(false);
+                                cleanStackPane.setVisible(true);
+                                cleanStackPane.getChildren().add(webView);
+                                cleanStackPane.autosize();
+                                LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked log file: " + f.getAbsolutePath());
+                            } catch (IOException ex) {
+                                Logger.getLogger(DigiMenuListener.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    } else {
+                        LOGGER.log(Level.WARNING, user.getUserName() + " tried to check log files.");
+                        USDialogs.warning(TEXT_NOTALLOWED_HEAD, TEXT_NOTALLOWED_TEXT);
+                    }
+                    //</editor-fold>
+                } else if (selected.equals(MENU_ACTUALLOG)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_ACTUALLOG">
+                    if (user.checkRight("checklog")) {
+                        WebView webView = new WebView();
+                        final WebEngine webEngine = webView.getEngine();
+                        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                        Date date = new Date();
+                        String fileName = config.getProperty("LOGDIR")+"/LOG_" + dateFormat.format(date).toString() + ".log";
+                        File f = new File(fileName);
                         if (f != null) {
                             try {
                                 //webEngine.load(f.toURI().toString());

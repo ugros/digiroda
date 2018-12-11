@@ -43,6 +43,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.scene.control.ToggleGroup;
 
 /**
@@ -53,7 +56,7 @@ import javafx.scene.control.ToggleGroup;
  *
  */
 public class DigiDB {
-    
+
     class StringAndId {
         private String text;
         private Integer id;
@@ -191,7 +194,7 @@ public class DigiDB {
             }
             LOGGER.log(Level.FINE, "Connection to mainDB is closed.");
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage());
         }
         try {
             if (localDB != null) {
@@ -199,7 +202,39 @@ public class DigiDB {
             }
             LOGGER.log(Level.FINE, "Connection to localDB is closed.");
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+        }
+    }
+    
+    
+    public void createUser(String userName, String password) {
+        try {
+            Pattern pu = Pattern.compile("^[a-zA-Z0-9_]*$");
+            Matcher mu = pu.matcher(userName);
+            Pattern pp = Pattern.compile("^[a-zA-Z0-9_öüóőúéáűÖÜÓŐÚÉÁŰíÍ+-@&#{}$ß<>łŁđĐ€×÷]*$");
+            Matcher mp = pp.matcher(password);
+            if (mu.find() && (mp.find()))            
+            {
+                String sql = "CREATE USER " + userName + " WITH PASSWORD '" + password + "'   LOGIN"
+                        + "  NOSUPERUSER"
+                        + "  INHERIT"
+                        + "  CREATEDB"
+                        + "  NOCREATEROLE"
+                        + "  REPLICATION;";
+                Statement st= getMainDB().createStatement();
+                st.executeUpdate(sql);
+                //GRANT postgres TO teszt WITH ADMIN OPTION;
+                //sql="grant all privileges on database "+config.getProperty("MAINDB")+" to "+userName+";";
+                sql="GRANT postgres TO "+userName+" WITH ADMIN OPTION;";
+                Statement st2= getMainDB().createStatement();
+                st2.executeUpdate(sql);
+                
+                LOGGER.log(Level.INFO, "User "+userName+" is created.");
+            } else USDialogs.warning("GÁZ VAN", "Ne irkájjá má' ilyen hülye karaktereket!");
+        
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            LOGGER.log(Level.SEVERE, ex.getMessage());
         }
     }
     

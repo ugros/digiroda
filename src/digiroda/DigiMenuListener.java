@@ -61,6 +61,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.control.Button;
@@ -108,6 +109,8 @@ class DigiMenuListener {
     final static String MENU_SETTINGS = language.getProperty("MENU_SETTINGS");
     final static String MENU_OPTIONS = language.getProperty("MENU_OPTIONS");
     final static String MENU_USERS = language.getProperty("MENU_USERS");
+    final static String MENU_CREATEUSER = language.getProperty("MENU_CREATEUSER");
+    final static String MENU_SETRIGHTS = language.getProperty("MENU_SETRIGHTS");
     final static String MENU_ARRIVE = language.getProperty("MENU_ARRIVE");
     final static String MENU_CALENDAR = language.getProperty("MENU_CALENDAR");
     //</editor-fold>
@@ -202,7 +205,8 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_CONTACTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_CONTACTS">
-                    digiroda.DigiController.treeItem3.setExpanded(true);
+                    
+                    digiroda.DigiController.treeItem3.setExpanded(!digiroda.DigiController.treeItem3.isExpanded());
                     //</editor-fold>
                 } else if (selected.equals(MENU_EXPORT)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_EXPORT">
@@ -299,7 +303,44 @@ class DigiMenuListener {
                     //</editor-fold>
                  } else if (selected.equals(MENU_SETTINGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
-                    digiroda.DigiController.treeItem4.setExpanded(true);
+                    digiroda.DigiController.treeItem4.setExpanded(!digiroda.DigiController.treeItem4.isExpanded());
+                    //</editor-fold>  
+                } else if (selected.equals(MENU_USERS)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_USERS">
+                    digiroda.DigiController.treeItem42.setExpanded(!digiroda.DigiController.treeItem42.isExpanded());
+                    //</editor-fold>  
+                } else if (selected.equals(MENU_CREATEUSER)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_CREATEUSER">
+                        contactsSplitP.setVisible(false);
+                        cleanScrollPane.setVisible(false);
+                        cleanAnchorPane.setVisible(false);
+                        cleanStackPane.setVisible(true);
+                        cleanStackPane.getChildren().clear();
+                        GridPane grid=new GridPane();
+                        Label label1=new Label("Felhasználónév");
+                        grid.add(label1, 1, 1);
+                        TextField userName=new TextField();
+                        grid.add(userName, 2, 1);
+                        Label label2=new Label("Jelszó");
+                        grid.add(label2, 1, 2);
+                        TextField password=new TextField();
+                        grid.add(password, 2, 2);
+                        
+                        Button btn = new Button("Létrehoz");
+                        btn.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent e) {
+                                user.getConnects().createUser(userName.getText(), password.getText());
+                            }
+                        });
+                        grid.add(btn, 4, 2);
+                        cleanStackPane.getChildren().add(grid);
+                    
+                    //</editor-fold>  
+                }  else if (selected.equals(MENU_SETRIGHTS)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_SETRIGHTS">
+                    
+                    
                     //</editor-fold>  
                 } else if (selected.equals(MENU_OPTIONS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_OPTIONS">

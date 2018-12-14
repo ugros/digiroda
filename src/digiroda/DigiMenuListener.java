@@ -43,6 +43,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -65,6 +66,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
@@ -301,7 +303,7 @@ class DigiMenuListener {
                     contactsTable.maxWidthProperty().bind(dataP.widthProperty());
                     LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked contacts.");
                     //</editor-fold>
-                 } else if (selected.equals(MENU_SETTINGS)) {
+                } else if (selected.equals(MENU_SETTINGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
                     digiroda.DigiController.treeItem4.setExpanded(!digiroda.DigiController.treeItem4.isExpanded());
                     //</editor-fold>  
@@ -325,19 +327,41 @@ class DigiMenuListener {
                         grid.add(label2, 1, 2);
                         TextField password=new TextField();
                         grid.add(password, 2, 2);
+                        Label label3=new Label("Vezetéknév");
+                        grid.add(label3, 1, 3);
+                        TextField familyName=new TextField();
+                        grid.add(familyName, 2, 3);
+                        Label label4=new Label("Keresztnév");
+                        grid.add(label4, 1, 4);
+                        TextField firstName=new TextField();
+                        grid.add(firstName, 2, 4);
+                        Label label5=new Label("Szervezeti egység");
+                        grid.add(label5, 1, 5);
+                        TextField division=new TextField();
+                        grid.add(division, 2, 5);
+                        
+                        List<DigiDB.CheckBoxStringAndId> list= user.getConnects().getAllOfRights();
+                        int i;
+                        for (i = 0; i < list.size(); i++) {
+                            CheckBox rb = list.get(i).getCheckBox();
+                            rb.setMinWidth(150);
+                            rb.setMaxWidth(150);
+                            grid.add(rb, 4, i+1);
+                        }  
                         
                         Button btn = new Button("Létrehoz");
                         btn.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
                             public void handle(ActionEvent e) {
-                                user.getConnects().createUser(userName.getText(), password.getText());
+                                int id= user.getConnects().createUser(familyName.getText(),firstName.getText(),userName.getText(),Integer.parseInt(division.getText()), password.getText());
+                                user.getConnects().addRights(id,list);
                             }
                         });
-                        grid.add(btn, 4, 2);
+                        grid.add(btn, 2, 6);
                         cleanStackPane.getChildren().add(grid);
                     
                     //</editor-fold>  
-                }  else if (selected.equals(MENU_SETRIGHTS)) {
+                } else if (selected.equals(MENU_SETRIGHTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETRIGHTS">
                     
                     
@@ -618,7 +642,7 @@ class DigiMenuListener {
                     vBox.getChildren().add(calendar.getView());
                     cleanScrollPane.setContent(vBox);
                     //</editor-fold>
-                }else if (selected.equals(MENU_QUIT)) {
+                } else if (selected.equals(MENU_QUIT)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_QUIT">
                     LOGGER.log(Level.INFO, "Program terminated.");
                     user.getConnects().close();

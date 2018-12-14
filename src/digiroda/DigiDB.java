@@ -46,7 +46,7 @@ import java.util.HashSet;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.CheckBox;
 
 /**
  * The DigiDB class takes care about two database connections (localDB and
@@ -58,21 +58,35 @@ import javafx.scene.control.ToggleGroup;
 public class DigiDB {
 
     class StringAndId {
+
         private String text;
         private Integer id;
+
         public StringAndId(String text, Integer id) {
-            this.text=text;
-            this.id=id;
+            this.text = text;
+            this.id = id;
         }
+
         public String getText() {
             return this.text;
         }
+
         public Integer getId() {
             return this.id;
         }
     }
+    class CheckBoxStringAndId extends StringAndId {
+        private CheckBox checkBox;
+        public CheckBoxStringAndId(String text, Integer id) {
+           super(text,id);
+           this.checkBox=new CheckBox(text);
+        }      
+        public CheckBox getCheckBox() {
+            return this.checkBox;
+        }
+    }
 
-    private final  String[] checkList = {"digidb", "digischema", "files", "companies", "contactpersons", "rights", "userrights", "users", "divisions"};
+    private final String[] checkList = {"digidb", "digischema", "archive", "flows", "relations", "statuscodes", "files", "companies", "contactpersons", "rights", "userrights", "users", "divisions"};
     private final Connection localDB;
     private final Connection mainDB;
     private final String LOCALHOST;
@@ -205,42 +219,98 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, ex.getMessage());
         }
     }
+
+    public List<CheckBoxStringAndId> getAllOfRights() {
+        List<CheckBoxStringAndId> allOfRights = new ArrayList<>();
+        String sql = "SELECT id, rightname FROM digischema.rights;";
+        try {
+            PreparedStatement st = getMainDB().prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                allOfRights.add(new CheckBoxStringAndId(rs.getString("rightname"), rs.getInt("id")));
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error while reading rights: " + ex.getMessage());
+            return null;
+        }
+        return allOfRights;
+    }
     
-    
-    public void createUser(String userName, String password) {
+    public boolean addRights(Integer userId, List<CheckBoxStringAndId> list) {
+        try {
+            String sql= "INSERT INTO digischema.userrights (userid, rightid) VALUES ( ?, ?);";
+            for (CheckBoxStringAndId cb : list) {
+                System.out.println(cb.checkBox.getText());
+                System.out.println(cb.checkBox.isSelected());
+                if (cb.checkBox.isSelected()) {
+                    Integer rightId=cb.getId();                    
+                    PreparedStatement st = getMainDB().prepareStatement(sql);
+                    st.setInt(1, userId);
+                    st.setInt(2, rightId);
+                    st.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DigiDB.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This function creates a single user with all fields
+     * 
+     */
+    public Integer createUser(String familyName, String firstName, String userName, Integer divisionId, String password) {
+        Integer userId=null;
         try {
             Pattern pu = Pattern.compile("^[a-zA-Z0-9_]*$");
             Matcher mu = pu.matcher(userName);
             Pattern pp = Pattern.compile("^[a-zA-Z0-9_öüóőúéáűÖÜÓŐÚÉÁŰíÍ+-@&#{}$ß<>łŁđĐ€×÷]*$");
             Matcher mp = pp.matcher(password);
-            if (mu.find() && (mp.find()))            
-            {
+            if (mu.find() && (mp.find())) {
                 String sql = "CREATE USER " + userName + " WITH PASSWORD '" + password + "'   LOGIN"
                         + "  NOSUPERUSER"
                         + "  INHERIT"
                         + "  CREATEDB"
                         + "  NOCREATEROLE"
                         + "  REPLICATION;";
-                Statement st= getMainDB().createStatement();
+                Statement st = getMainDB().createStatement();
                 st.executeUpdate(sql);
-                //GRANT postgres TO teszt WITH ADMIN OPTION;
-                //sql="grant all privileges on database "+config.getProperty("MAINDB")+" to "+userName+";";
-                sql="GRANT postgres TO "+userName+" WITH ADMIN OPTION;";
-                Statement st2= getMainDB().createStatement();
+                sql = "GRANT postgres TO " + userName + " WITH ADMIN OPTION;";
+                Statement st2 = getMainDB().createStatement();
                 st2.executeUpdate(sql);
-                
-                LOGGER.log(Level.INFO, "User "+userName+" is created.");
-            } else USDialogs.warning("GÁZ VAN", "Ne irkájjá má' ilyen hülye karaktereket!");
-        
+
+                LOGGER.log(Level.INFO, "User " + userName + " is created.");
+            } else {
+                USDialogs.warning("GÁZ VAN", "Ne irkájjá má' ilyen hülye karaktereket!");
+                return null;
+            }
+            String sql = "INSERT INTO digischema.users(familyname, firstname, username, divisionid) VALUES (?, ?, ?, ?);";
+            PreparedStatement st = getMainDB().prepareStatement(sql);
+            st.setString(1, familyName);
+            st.setString(2, firstName);
+            st.setString(3, userName);
+            st.setInt(4, divisionId);
+            st.executeUpdate();
+            
+            sql = "SELECT id FROM digischema.users WHERE username=?;";
+            PreparedStatement st2 = getMainDB().prepareStatement(sql);
+            st2.setString(1, userName);
+            ResultSet rs = st2.executeQuery();
+            while (rs.next()) userId=rs.getInt("id");
+            return userId;
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            return null;
         }
     }
-    
+
     /**
-     * This function returned with a list of string and id's list
-     * for radiobuttons in arrive's panel
+     * This function returned with a list of string and id's list for
+     * radiobuttons in arrive's panel
      *
      */
     public List<StringAndId> getRadioButtonsOFDivisions() {
@@ -248,14 +318,14 @@ public class DigiDB {
         String sql = "SELECT users.id, users.familyname, users.firstname, divisions.name as division"
                 + " FROM digischema.users, digischema.divisions "
                 + " WHERE users.id=divisions.bossid;";
-        ToggleGroup toggleGroup = new ToggleGroup();
-        toggleGroup.selectedToggleProperty().addListener((observable, oldVal, newVal) -> System.out.println(newVal + " was selected"));
+        //ToggleGroup toggleGroup = new ToggleGroup();
+        //toggleGroup.selectedToggleProperty().addListener((observable, oldVal, newVal) -> System.out.println(newVal + " was selected"));
         try {
             PreparedStatement st = getMainDB().prepareStatement(sql);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                radioButtons.add(new StringAndId(rs.getString("division")+"\n"
-                      +rs.getString("familyname")+" "+rs.getString("firstname"),
+                radioButtons.add(new StringAndId(rs.getString("division") + "\n"
+                        + rs.getString("familyname") + " " + rs.getString("firstname"),
                         rs.getInt("id")));
             }
         } catch (SQLException ex) {
@@ -263,43 +333,44 @@ public class DigiDB {
         }
         return radioButtons;
     }
-    
+
     /**
-     * This method makes arrived a documentum, stores in archive and creates first step of flow.
-     *     
+     * This method makes arrived a documentum, stores in archive and creates
+     * first step of flow.
+     *
      */
     public void storeInArchive(String fileName, Timestamp timeStamp, Integer userId) {
-        String sql="";
+        String sql = "";
         try {
             sql = "INSERT INTO digischema.archive("
-                + "	\"timestamp\", filename)"
-                + "	VALUES (?, ?);";
-        
+                    + "	\"timestamp\", filename)"
+                    + "	VALUES (?, ?);";
+
             PreparedStatement st = getMainDB().prepareStatement(sql);
             st.setTimestamp(1, timeStamp);
             st.setString(2, fileName);
             st.executeUpdate();
-        
-            sql = " SELECT id from digischema.archive where \"timestamp\"='"+timeStamp+"';";
+
+            sql = " SELECT id from digischema.archive where \"timestamp\"='" + timeStamp + "';";
             PreparedStatement st1 = getMainDB().prepareStatement(sql);
             ResultSet rs = st1.executeQuery();
             Integer id;
             while (rs.next()) {
-                id=rs.getInt("id");
-                sql = "INSERT INTO digischema.flows(" +
-                        "	userid, docid, status, \"timestamp\")" +
-                        "	VALUES (?, ?, ?, ?);";
-        
+                id = rs.getInt("id");
+                sql = "INSERT INTO digischema.flows("
+                        + "	userid, docid, status, \"timestamp\")"
+                        + "	VALUES (?, ?, ?, ?);";
+
                 PreparedStatement st2 = getMainDB().prepareStatement(sql);
                 st2.setInt(1, userId);
                 st2.setInt(2, id);
                 st2.setInt(3, 1);
                 st2.setTimestamp(4, timeStamp);
                 st2.executeUpdate();
-               
+
             }
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error while stored "+fileName+" in archive: "+ ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Error while stored " + fileName + " in archive: " + ex.getMessage());
             USDialogs.warning(language.getProperty("TEXT_NOTSTORED_HEAD"), language.getProperty("TEXT_NOTSTORED_TEXT"));
         }
     }
@@ -326,14 +397,14 @@ public class DigiDB {
                 return true;
             } else {
                 LOGGER.log(Level.SEVERE, "The main database, schema or tables don't exist.");
-                USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"),language.getProperty("TEXT_MAINERROR_TEXT"));
+                USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"), language.getProperty("TEXT_MAINERROR_TEXT"));
             }
 
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while checked main database and its tables: " + ex.getMessage());
-            USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"),language.getProperty("TEXT_MAINERROR_TEXT"),ex.getMessage());
+            USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"), language.getProperty("TEXT_MAINERROR_TEXT"), ex.getMessage());
         }
-        
+
         return false;
     }
 

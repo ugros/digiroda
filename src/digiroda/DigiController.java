@@ -31,11 +31,14 @@ import static digiroda.DigiMenuListener.MENU_CREATEUSER;
 import static digiroda.DigiMenuListener.MENU_OPTIONS;
 import static digiroda.DigiMenuListener.MENU_SETRIGHTS;
 import static digiroda.DigiMenuListener.MENU_USERS;
+import static digiroda.DigiMenuListener.connects;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -136,9 +139,11 @@ public class DigiController implements Initializable {
                 config.loadFromXML(in); 
                 external=true;                
             } else {
-                //f.createNewFile();
             	input2 = loader.getResourceAsStream("resources/config.properties");           
-            	config.load(input2);            	
+            	config.load(input2);  
+                f.createNewFile();
+                OutputStream os = new FileOutputStream(f);
+                config.storeToXML(os, "Beállítások");
             }
             
         } catch (IOException e) {
@@ -271,7 +276,7 @@ public class DigiController implements Initializable {
         } else {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
            USDialogs.warning(language.getProperty("DATABASE_ERROR_TITLE"), language.getProperty("USERCHECK_ERROR_TEXT"));
-           user.getConnects().close();
+           connects.close();
            System.exit(1);
         }
     }

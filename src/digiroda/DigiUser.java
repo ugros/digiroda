@@ -29,6 +29,7 @@ import java.util.logging.Level;
 public class DigiUser extends ussoft.User {
 
     private final DigiDB CONNECTS;
+    private Integer userId;
     private String LOGINTEXT;
     private String LOGINTITLE;
     

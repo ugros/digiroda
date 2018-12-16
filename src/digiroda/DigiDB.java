@@ -75,24 +75,30 @@ public class DigiDB {
             return this.id;
         }
     }
+
     class CheckBoxStringAndId extends StringAndId {
+
         private CheckBox checkBox;
+
         public CheckBoxStringAndId(String text, Integer id) {
-           super(text,id);
-           this.checkBox=new CheckBox(text);
-        }      
+            super(text, id);
+            this.checkBox = new CheckBox(text);
+        }
+
         public CheckBox getCheckBox() {
             return this.checkBox;
         }
     }
 
-    private final String[] checkList = {"digidb", "digischema", "archive", "flows", "relations", "statuscodes", "files", "companies", "contactpersons", "rights", "userrights", "users", "divisions"};
+    private final String[] checkList = {"digischema", "archive", "flows", "relations", "statuscodes", "files", "companies", "contactpersons", "rights", "userrights", "users", "divisions"};
+    private final String[] rightList = {"opencontacts","addcontact","readlogs","addusers","checklog"};
     private final Connection localDB;
     private final Connection mainDB;
     private final String LOCALHOST;
     private final String LOCALSCHEMA;
     private final String MAINHOST;
     private final String MAINDB;
+    private List<String> dbList;
     private final TableView table = new TableView();
     private ResultSet rs;
     ObservableList<String[]> dataRows = FXCollections.observableArrayList();
@@ -123,15 +129,377 @@ public class DigiDB {
      * @param password	password to main database
      */
     public DigiDB(String user, String password) {
-
+        String sql="";
         MAINHOST = config.getProperty("MAINHOST");
         MAINDB = config.getProperty("MAINDB");
         mainDB = setMainDB(MAINHOST, MAINDB, user, password);
         if (mainDB != null) {
             LOGGER.log(Level.FINE, "Connected to the main database");
             if (!checkDBTables()) {
-                close();
-                System.exit(0);
+                if (USDialogs.confirmation(language.getProperty("CREATEDB_HEAD"), language.getProperty("CREATEDB_TEXT")).getText().equalsIgnoreCase("ok")) {
+                   
+                    if (!dbList.contains(MAINDB)) {
+                        try {
+                            sql = " CREATE DATABASE " + MAINDB + " "
+                                    + " WITH "
+                                    + " OWNER = postgres"
+                                    + " ENCODING = 'UTF8'"
+                                    + " LC_COLLATE = 'Hungarian_Hungary.1250'"
+                                    + " LC_CTYPE = 'Hungarian_Hungary.1250'"
+                                    + " TABLESPACE = pg_default"
+                                    + " CONNECTION LIMIT = -1;"
+                                    + " GRANT ALL ON DATABASE digidb TO postgres;"
+                                    + " GRANT TEMPORARY, CONNECT ON DATABASE digidb TO PUBLIC;"
+                                    + " ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO postgres;"
+                                    + " ALTER DEFAULT PRIVILEGES GRANT USAGE, SELECT ON SEQUENCES TO postgres;";
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created database: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("digischema")) {
+                        try {
+                            sql = " CREATE SCHEMA digischema AUTHORIZATION postgres;"
+                                    + " GRANT ALL ON SCHEMA digischema TO postgres;";
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created schema: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("archive")) {
+                        try {
+                            sql = " CREATE TABLE digischema.archive"
+                                    + " ( id bigserial NOT NULL,"
+                                    + "    filename character varying COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    \"timestamp\" timestamp with time zone,"
+                                    + "    CONSTRAINT archive_pkey PRIMARY KEY (id) )"
+                                    + " WITH (OIDS = FALSE)"
+                                    + " TABLESPACE pg_default;"
+                                    + " ALTER TABLE digischema.archive OWNER to postgres;"
+                                    + " GRANT ALL ON TABLE digischema.archive TO postgres;";
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of archive: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("companies")) {
+                        try {
+                            sql = " CREATE TABLE digischema.companies"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    company character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    country character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    city character varying(50) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    adress character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    phonenumber character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    email character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    boss character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    CONSTRAINT companies_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.companies"
+                                    + "    OWNER to postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of companies: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("contactpersons")) {
+                        try {
+                            sql = " CREATE TABLE digischema.contactpersons"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    companyid integer,"
+                                    + "    familyname character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    firstname character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    country character varying(50) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    city character varying(50) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    adress character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    phonenumber character varying(20) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    email character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    postalcode character varying COLLATE pg_catalog.\"default\","
+                                    + "    CONSTRAINT contactpersons_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.contactpersons"
+                                    + "    OWNER to postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of contactpersons: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("divisions")) {
+                        try {
+                            sql = " CREATE TABLE digischema.divisions"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    shortname character varying(10) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    name character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    bossid integer NOT NULL,"
+                                    + "    hierarchycode character varying(10) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    CONSTRAINT divisions_name_key UNIQUE (name)"
+                                    + ","
+                                    + "    CONSTRAINT divisions_shortname_key UNIQUE (shortname)"
+                                    + ""
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.divisions"
+                                    + "    OWNER to postgres;"
+                                    + ""
+                                    + "GRANT ALL ON TABLE digischema.divisions TO postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of divisions: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("files")) {
+                        try {
+                            sql = " CREATE TABLE digischema.files"
+                                    + "("
+                                    + "    docid bigint NOT NULL,"
+                                    + "    partnerid integer NOT NULL,"
+                                    + "    subject character varying(400) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    url character varying(50) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    contactpersonid integer,"
+                                    + "    deadline date,"
+                                    + "    archivecategory character varying(4) COLLATE pg_catalog.\"default\","
+                                    + "    instructions text COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    CONSTRAINT files_pkey PRIMARY KEY (docid)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.files"
+                                    + "    OWNER to postgres;"
+                                    + ""
+                                    + "GRANT ALL ON TABLE digischema.files TO postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of files: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("flows")) {
+                        try {
+                            sql = " CREATE TABLE digischema.flows"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    userid bigint NOT NULL,"
+                                    + "    docid bigint NOT NULL,"
+                                    + "    status bigint NOT NULL,"
+                                    + "    \"timestamp\" timestamp with time zone,"
+                                    + "    CONSTRAINT flows_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.flows"
+                                    + "    OWNER to postgres;"
+                                    + ""
+                                    + "GRANT ALL ON TABLE digischema.flows TO postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of flows: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("relations")) {
+                        try {
+                            sql = " CREATE TABLE digischema.relations"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    antecedentdocid bigint NOT NULL,"
+                                    + "    followindocid bigint NOT NULL,"
+                                    + "    CONSTRAINT relations_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.relations"
+                                    + "    OWNER to postgres;"
+                                    + ""
+                                    + "GRANT ALL ON TABLE digischema.relations TO postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of relations: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("rights")) {
+                        try {
+                            sql = " CREATE TABLE digischema.rights"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    rightname character varying(20) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    CONSTRAINT rights_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.rights"
+                                    + "    OWNER to postgres;"
+                                    + "INSERT INTO digischema.rights(rightname)" 
+                                    + "	VALUES ";
+                            for  (int i=0; i<rightList.length; i++) {
+                             sql+="('"+rightList[i]+"')";
+                             if (i<rightList.length-1) 
+                                 sql+=", "; 
+                             else 
+                                 sql+=";";
+                            }
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of rights: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("statuscodes")) {
+                        try {
+                            sql = " CREATE TABLE digischema.statuscodes"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    status character varying COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    CONSTRAINT statuscodes_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.statuscodes"
+                                    + "    OWNER to postgres;"
+                                    + ""
+                                    + "GRANT ALL ON TABLE digischema.statuscodes TO postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of statuscodes: " + ex.getMessage());
+                        }
+                    }
+                    
+                    if (!dbList.contains("users")) {
+                        try {
+                            sql = " CREATE TABLE digischema.users"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    familyname character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    firstname character varying(200) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    username character varying(50) COLLATE pg_catalog.\"default\" NOT NULL,"
+                                    + "    divisionid bigint,"
+                                    + "    CONSTRAINT users_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.users"
+                                    + "    OWNER to postgres;"
+                                    + "INSERT INTO digischema.users("
+                                    + "	familyname, firstname, username, divisionid)"
+                                    + "	VALUES ('Rendszergazda', '#1', 'postgres', 0);";
+                           
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Error while created table of users: " + ex.getMessage());
+                        }
+                    }
+
+                    if (!dbList.contains("userrights")) {
+                        try {
+                            sql = " CREATE TABLE digischema.userrights"
+                                    + "("
+                                    + "    id bigserial NOT NULL,"
+                                    + "    userid integer,"
+                                    + "    rightid integer,"
+                                    + "    CONSTRAINT userrights_pkey PRIMARY KEY (id)"
+                                    + ")"
+                                    + "WITH ("
+                                    + "    OIDS = FALSE"
+                                    + ")"
+                                    + "TABLESPACE pg_default;"
+                                    + ""
+                                    + "ALTER TABLE digischema.userrights"
+                                    + "    OWNER to postgres;";
+                            
+                            Statement st = getMainDB().createStatement();
+                            st.executeUpdate(sql);
+                            
+                            sql="SELECT id FROM digischema.users where username='postgres'";
+                            
+                            Statement st2 = getMainDB().createStatement();
+                            ResultSet rs2= st2.executeQuery(sql); 
+                            int userId=0;
+                            while (rs2.next()) {
+                                userId=rs2.getInt("id");
+                            }
+                            sql="SELECT id FROM digischema.rights";
+                            
+                            Statement st3 = getMainDB().createStatement();
+                            ResultSet rs3= st3.executeQuery(sql); 
+                            while (rs3.next()) {
+                                sql = "INSERT INTO digischema.userrights("
+                                        + "	userid, rightid)"
+                                        + "	VALUES ("+userId+", "+rs3.getInt("id")+");";   
+                                
+                                Statement st4 = getMainDB().createStatement();
+                                st4.executeUpdate(sql);
+                            }
+                            
+                            
+                        } catch (SQLException ex) {                            
+                            LOGGER.log(Level.SEVERE, "Error while created table of userrights: " + ex.getMessage());
+                        }
+                    }
+                } else {
+                    close();
+                    System.exit(0);
+                }
             }
         } else {
             close();
@@ -235,15 +603,15 @@ public class DigiDB {
         }
         return allOfRights;
     }
-    
+
     public boolean addRights(Integer userId, List<CheckBoxStringAndId> list) {
         try {
-            String sql= "INSERT INTO digischema.userrights (userid, rightid) VALUES ( ?, ?);";
+            String sql = "INSERT INTO digischema.userrights (userid, rightid) VALUES ( ?, ?);";
             for (CheckBoxStringAndId cb : list) {
                 System.out.println(cb.checkBox.getText());
                 System.out.println(cb.checkBox.isSelected());
                 if (cb.checkBox.isSelected()) {
-                    Integer rightId=cb.getId();                    
+                    Integer rightId = cb.getId();
                     PreparedStatement st = getMainDB().prepareStatement(sql);
                     st.setInt(1, userId);
                     st.setInt(2, rightId);
@@ -257,12 +625,28 @@ public class DigiDB {
         return true;
     }
 
+    public Integer getUserId(String userName) {
+        Integer userId = null;
+        try {
+            String sql = "SELECT id FROM digischema.users WHERE username=?;";
+            PreparedStatement st2 = getMainDB().prepareStatement(sql);
+            st2.setString(1, userName);
+            ResultSet rs = st2.executeQuery();
+            while (rs.next()) {
+                userId = rs.getInt("id");
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+        }
+        return userId;
+    }
+
     /**
      * This function creates a single user with all fields
-     * 
+     *
      */
     public Integer createUser(String familyName, String firstName, String userName, Integer divisionId, String password) {
-        Integer userId=null;
+        Integer userId = null;
         try {
             Pattern pu = Pattern.compile("^[a-zA-Z0-9_]*$");
             Matcher mu = pu.matcher(userName);
@@ -293,16 +677,10 @@ public class DigiDB {
             st.setString(3, userName);
             st.setInt(4, divisionId);
             st.executeUpdate();
-            
-            sql = "SELECT id FROM digischema.users WHERE username=?;";
-            PreparedStatement st2 = getMainDB().prepareStatement(sql);
-            st2.setString(1, userName);
-            ResultSet rs = st2.executeQuery();
-            while (rs.next()) userId=rs.getInt("id");
-            return userId;
+
+            return getUserId(userName);
 
         } catch (SQLException ex) {
-            ex.printStackTrace();
             LOGGER.log(Level.SEVERE, ex.getMessage());
             return null;
         }
@@ -324,7 +702,7 @@ public class DigiDB {
             PreparedStatement st = getMainDB().prepareStatement(sql);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                radioButtons.add(new StringAndId(rs.getString("division") + "\n"
+                radioButtons.add(new StringAndId(rs.getString("division") + ""
                         + rs.getString("familyname") + " " + rs.getString("firstname"),
                         rs.getInt("id")));
             }
@@ -380,14 +758,14 @@ public class DigiDB {
      * of tables.
      */
     public boolean checkDBTables() {
-        String sql = "SELECT datname as name FROM pg_catalog.pg_database WHERE datname='digidb' union all \n"
-                + "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'digischema' union all \n"
+        String sql = "SELECT datname as name FROM pg_catalog.pg_database WHERE datname='"+MAINDB+"' union all "
+                + "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'digischema' union all "
                 + "SELECT table_name FROM information_schema.tables WHERE  table_schema = 'digischema';";
         try {
             PreparedStatement st = getMainDB().prepareStatement(sql);
             ResultSet rs = st.executeQuery();
 
-            List<String> dbList = new ArrayList<>();
+            dbList = new ArrayList<>();
             while (rs.next()) {
                 dbList.add(rs.getString("name"));
             }
@@ -397,12 +775,12 @@ public class DigiDB {
                 return true;
             } else {
                 LOGGER.log(Level.SEVERE, "The main database, schema or tables don't exist.");
-                USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"), language.getProperty("TEXT_MAINERROR_TEXT"));
+                //USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"), language.getProperty("TEXT_MAINERROR_TEXT"));
             }
 
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while checked main database and its tables: " + ex.getMessage());
-            USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"), language.getProperty("TEXT_MAINERROR_TEXT"), ex.getMessage());
+            //USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"), language.getProperty("TEXT_MAINERROR_TEXT"), ex.getMessage());
         }
 
         return false;

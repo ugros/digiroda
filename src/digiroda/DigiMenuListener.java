@@ -43,7 +43,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -115,6 +114,7 @@ class DigiMenuListener {
     final static String MENU_SETRIGHTS = language.getProperty("MENU_SETRIGHTS");
     final static String MENU_ARRIVE = language.getProperty("MENU_ARRIVE");
     final static String MENU_CALENDAR = language.getProperty("MENU_CALENDAR");
+    final static DigiDB connects=user.getConnects();
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
     final static String COLUMN_COMPANYNAME = language.getProperty("COLUMN_COMPANYNAME");
@@ -128,17 +128,17 @@ class DigiMenuListener {
     final static String COLUMN_ADRESS = language.getProperty("COLUMN_ADRESS");
     //</editor-fold>     
     //<editor-fold defaultstate="collapsed" desc="Other constants">
-    final static String TEXT_NOTALLOWED_HEAD=language.getProperty("TEXT_NOTALLOWED_HEAD");
-    final static String TEXT_NOTALLOWED_TEXT=language.getProperty("TEXT_NOTALLOWED_TEXT");
-    final static String ARCHIVE1=config.getProperty("ARCHIVE1");
-    final static String ARCHIVE2=config.getProperty("ARCHIVE2");
+    final static String TEXT_NOTALLOWED_HEAD = language.getProperty("TEXT_NOTALLOWED_HEAD");
+    final static String TEXT_NOTALLOWED_TEXT = language.getProperty("TEXT_NOTALLOWED_TEXT");
+    final static String ARCHIVE1 = config.getProperty("ARCHIVE1");
+    final static String ARCHIVE2 = config.getProperty("ARCHIVE2");
     //</editor-fold>
-    
-    static String readFile(String path, Charset encoding) throws IOException {            
+
+    static String readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
     }
-    
+
     public EventHandler colValueCommit() {
         return new EventHandler<TableColumn.CellEditEvent<Settings, String>>() {
             @Override
@@ -148,15 +148,16 @@ class DigiMenuListener {
                 String value = t.getNewValue();
                 try {
                     config.setProperty(key, value);
-                    File f=new File("./config.xml");
-                    if (!f.exists()) 
+                    File f = new File("./config.xml");
+                    if (!f.exists()) {
                         f.createNewFile();
-                    OutputStream os=new FileOutputStream(f);
+                    }
+                    OutputStream os = new FileOutputStream(f);
                     config.storeToXML(os, "Beállítások");
                     LOGGER.log(Level.INFO, "User " + user.getUserName() + " edited options.");
                 } catch (IOException ex) {
                     LOGGER.log(Level.SEVERE, ex.getMessage());
-                } 
+                }
             }
         };
     }
@@ -169,31 +170,38 @@ class DigiMenuListener {
             }
         };
     }
-    
+
     public class Settings {
-                        private SimpleStringProperty key;
-                        private SimpleStringProperty value;
-                        public Settings() {
-                            this.key = new SimpleStringProperty("");
-                            this.value = new SimpleStringProperty("");
-                        }
-                        public Settings(String key, String value) {
-                            this.key = new SimpleStringProperty(key);
-                            this.value = new SimpleStringProperty(value);
-                        }
-                        public String getKey() {
-                            return this.key.getValue();
-                        }
-                        public String getValue() {
-                            return this.value.getValue();
-                        }
-                        public void setKey(String newValue) {
-                            this.key = new SimpleStringProperty(newValue);
-                        }                        
-                        public void setValue(String newValue) {
-                            this.value = new SimpleStringProperty(newValue);
-                        }                        
-                    }
+
+        private SimpleStringProperty key;
+        private SimpleStringProperty value;
+
+        public Settings() {
+            this.key = new SimpleStringProperty("");
+            this.value = new SimpleStringProperty("");
+        }
+
+        public Settings(String key, String value) {
+            this.key = new SimpleStringProperty(key);
+            this.value = new SimpleStringProperty(value);
+        }
+
+        public String getKey() {
+            return this.key.getValue();
+        }
+
+        public String getValue() {
+            return this.value.getValue();
+        }
+
+        public void setKey(String newValue) {
+            this.key = new SimpleStringProperty(newValue);
+        }
+
+        public void setValue(String newValue) {
+            this.value = new SimpleStringProperty(newValue);
+        }
+    }
 
     public ChangeListener menuListener() {
         return (ChangeListener) new ChangeListener() {
@@ -207,7 +215,7 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_CONTACTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_CONTACTS">
-                    
+
                     digiroda.DigiController.treeItem3.setExpanded(!digiroda.DigiController.treeItem3.isExpanded());
                     //</editor-fold>
                 } else if (selected.equals(MENU_EXPORT)) {
@@ -221,8 +229,8 @@ class DigiMenuListener {
                     cleanStackPane.setVisible(false);
                     contactsSplitP.setVisible(true);
                     contactsTable.getColumns().clear();
-                    
-                    ObservableList<DigiContacts> tableList = user.getConnects().getContacts();
+
+                    ObservableList<DigiContacts> tableList = connects.getContacts();
 
                     TableColumn companyN = new TableColumn(COLUMN_COMPANYNAME);
                     companyN.setMinWidth(150);
@@ -313,58 +321,61 @@ class DigiMenuListener {
                     //</editor-fold>  
                 } else if (selected.equals(MENU_CREATEUSER)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_CREATEUSER">
-                        contactsSplitP.setVisible(false);
-                        cleanScrollPane.setVisible(false);
-                        cleanAnchorPane.setVisible(false);
-                        cleanStackPane.setVisible(true);
-                        cleanStackPane.getChildren().clear();
-                        GridPane grid=new GridPane();
-                        Label label1=new Label("Felhasználónév");
-                        grid.add(label1, 1, 1);
-                        TextField userName=new TextField();
-                        grid.add(userName, 2, 1);
-                        Label label2=new Label("Jelszó");
-                        grid.add(label2, 1, 2);
-                        TextField password=new TextField();
-                        grid.add(password, 2, 2);
-                        Label label3=new Label("Vezetéknév");
-                        grid.add(label3, 1, 3);
-                        TextField familyName=new TextField();
-                        grid.add(familyName, 2, 3);
-                        Label label4=new Label("Keresztnév");
-                        grid.add(label4, 1, 4);
-                        TextField firstName=new TextField();
-                        grid.add(firstName, 2, 4);
-                        Label label5=new Label("Szervezeti egység");
-                        grid.add(label5, 1, 5);
-                        TextField division=new TextField();
-                        grid.add(division, 2, 5);
-                        
-                        List<DigiDB.CheckBoxStringAndId> list= user.getConnects().getAllOfRights();
-                        int i;
-                        for (i = 0; i < list.size(); i++) {
-                            CheckBox rb = list.get(i).getCheckBox();
-                            rb.setMinWidth(150);
-                            rb.setMaxWidth(150);
-                            grid.add(rb, 4, i+1);
-                        }  
-                        
-                        Button btn = new Button("Létrehoz");
-                        btn.setOnAction(new EventHandler<ActionEvent>() {
-                            @Override
-                            public void handle(ActionEvent e) {
-                                int id= user.getConnects().createUser(familyName.getText(),firstName.getText(),userName.getText(),Integer.parseInt(division.getText()), password.getText());
-                                user.getConnects().addRights(id,list);
-                            }
-                        });
-                        grid.add(btn, 2, 6);
-                        cleanStackPane.getChildren().add(grid);
-                    
+                    contactsSplitP.setVisible(false);
+                    cleanScrollPane.setVisible(false);
+                    cleanAnchorPane.setVisible(false);
+                    cleanStackPane.setVisible(true);
+                    cleanStackPane.getChildren().clear();
+                    VBox vBox = new VBox();
+                    GridPane grid1 = new GridPane();
+                    grid1.getStyleClass().clear();
+                    grid1.getStyleClass().addAll("sp10", "hbox");
+                    Label label1 = new Label("Felhasználónév");
+                    grid1.add(label1, 1, 1);
+                    TextField userName = new TextField();
+                    grid1.add(userName, 2, 1);
+                    Label label2 = new Label("Jelszó");
+                    grid1.add(label2, 1, 2);
+                    TextField password = new TextField();
+                    grid1.add(password, 2, 2);
+                    Label label3 = new Label("Vezetéknév");
+                    grid1.add(label3, 1, 3);
+                    TextField familyName = new TextField();
+                    grid1.add(familyName, 2, 3);
+                    Label label4 = new Label("Keresztnév");
+                    grid1.add(label4, 1, 4);
+                    TextField firstName = new TextField();
+                    grid1.add(firstName, 2, 4);
+                    Label label5 = new Label("Szervezeti egység");
+                    grid1.add(label5, 1, 5);
+                    TextField division = new TextField();
+                    grid1.add(division, 2, 5);
+                    GridPane grid2 = new GridPane();
+                    grid2.getStyleClass().addAll("sp10", "hbox");
+                    List<DigiDB.CheckBoxStringAndId> list = connects.getAllOfRights();
+                    int i;
+                    for (i = 0; i < list.size(); i++) {
+                        CheckBox cb = list.get(i).getCheckBox();
+                        cb.setMinWidth((int) cleanStackPane.getWidth() / 5);
+                        grid2.add(cb, i % 5, (int) i / 5);
+                    }
+
+                    Button btn = new Button("Létrehoz");
+                    btn.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent e) {
+                            int id = connects.createUser(familyName.getText(), firstName.getText(), userName.getText(), Integer.parseInt(division.getText()), password.getText());
+                            connects.addRights(id, list);
+                        }
+                    });
+                    grid1.add(btn, 2, 6);
+                    vBox.getChildren().addAll(grid1, grid2);
+                    cleanStackPane.getChildren().add(vBox);
+
                     //</editor-fold>  
                 } else if (selected.equals(MENU_SETRIGHTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETRIGHTS">
-                    
-                    
+
                     //</editor-fold>  
                 } else if (selected.equals(MENU_OPTIONS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_OPTIONS">
@@ -372,14 +383,14 @@ class DigiMenuListener {
                     cleanStackPane.setVisible(false);
                     contactsSplitP.setVisible(false);
                     cleanScrollPane.setVisible(true);
-                    VBox vBox=new VBox();
+                    VBox vBox = new VBox();
                     TableView table = new TableView();
-                   
+
                     ObservableList<Settings> tableList = FXCollections.observableArrayList();
                     config.forEach((key, value) -> {
-                        tableList.add(new Settings((String)key,(String)value));
+                        tableList.add(new Settings((String) key, (String) value));
                     });
-                    
+
                     TableColumn colKey = new TableColumn(language.getProperty("COLUMN_KEY"));
                     colKey.setMinWidth(150);
                     colKey.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -390,12 +401,12 @@ class DigiMenuListener {
                     colValue.setMinWidth(150);
                     colValue.setCellFactory(TextFieldTableCell.forTableColumn());
                     colValue.setCellValueFactory(new PropertyValueFactory<>("value"));
-                    colValue.setOnEditCommit(colValueCommit());   
-                    
-                    table.getColumns().addAll(colKey,colValue);
+                    colValue.setOnEditCommit(colValueCommit());
+
+                    table.getColumns().addAll(colKey, colValue);
                     table.setEditable(true);
-                    Label label=new Label(language.getProperty("TEXT_FILTER"));
-                    TextField filter=new TextField();
+                    Label label = new Label(language.getProperty("TEXT_FILTER"));
+                    TextField filter = new TextField();
                     FilteredList<Settings> filteredList = new FilteredList<>(tableList);
                     filter.textProperty().addListener((observable2, oldValue2, newValue2) -> {
                         filteredList.setPredicate(
@@ -410,15 +421,15 @@ class DigiMenuListener {
                             }
                         });
                     });
-                    table.setItems(filteredList);                    
-                    HBox hBox=new HBox();
-                    hBox.getChildren().addAll(label,filter);
-                    vBox.getChildren().addAll(hBox,table);
+                    table.setItems(filteredList);
+                    HBox hBox = new HBox();
+                    hBox.getChildren().addAll(label, filter);
+                    vBox.getChildren().addAll(hBox, table);
                     hBox.getStyleClass().add("hbox");
                     vBox.getStyleClass().add("vbox");
                     label.getStyleClass().add("padding10right");
                     cleanScrollPane.setContent(vBox);
-                    
+
                     table.minWidthProperty().bind(cleanScrollPane.widthProperty());
                     table.maxWidthProperty().bind(cleanScrollPane.widthProperty());
                     LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked options.");
@@ -461,7 +472,7 @@ class DigiMenuListener {
                         final WebEngine webEngine = webView.getEngine();
                         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                         Date date = new Date();
-                        String fileName = config.getProperty("LOGDIR")+"/LOG_" + dateFormat.format(date).toString() + ".log";
+                        String fileName = config.getProperty("LOGDIR") + "/LOG_" + dateFormat.format(date).toString() + ".log";
                         File f = new File(fileName);
                         if (f != null) {
                             try {
@@ -495,12 +506,15 @@ class DigiMenuListener {
                     vBox.getStyleClass().add("vbox");
                     gridPane = new GridPane();
                     gridPane.getStyleClass().add("gridpane");
-                    
-                    cols= Integer.parseInt(config.getProperty("PREVIEW_COLUMNS"));  
-                    if (cols>4) cols=4; 
-                        else if (cols<1) cols=1;
-                    Double fullWidth=cleanScrollPane.getWidth();
-                    width= (fullWidth/cols)-195;
+
+                    cols = Integer.parseInt(config.getProperty("PREVIEW_COLUMNS"));
+                    if (cols > 4) {
+                        cols = 4;
+                    } else if (cols < 1) {
+                        cols = 1;
+                    }
+                    Double fullWidth = cleanScrollPane.getWidth();
+                    width = (fullWidth / cols) - 195;
                     final File directory = new File(config.getProperty("READFROM"));
 
                     fileList = directory.listFiles(new FileFilter() {
@@ -517,11 +531,10 @@ class DigiMenuListener {
 
                     vBox.getChildren().addAll(gridPane);
                     cleanScrollPane.setContent(vBox);
-                    
 
                     Task<Void> longRunningTask = new Task<Void>() {
                         private int counter;
-                        private List<DigiDB.StringAndId> radioButtons = user.getConnects().getRadioButtonsOFDivisions();
+                        private List<DigiDB.StringAndId> radioButtons = connects.getRadioButtonsOFDivisions();
 
                         @Override
                         protected Void call() {
@@ -529,21 +542,21 @@ class DigiMenuListener {
                             for (File file : fileList) {
                                 try {
                                     BufferedImage bufferedImge;
-                                    
+
                                     PDDocument document = PDDocument.load(file);
                                     PDFRenderer renderer = new PDFRenderer(document);
                                     bufferedImge = renderer.renderImage(0);
                                     document.close();
-                                
+
                                     Image image = SwingFXUtils.toFXImage(bufferedImge, null);
-                                    Double ratio =  width / image.getWidth();
+                                    Double ratio = width / image.getWidth();
 
                                     imageView = new ImageView();
                                     imageView = new ImageView();
                                     imageView.setImage(image);
                                     imageView.setFitWidth(width);
                                     imageView.setFitHeight(ratio * image.getHeight());
-                                   
+
                                     Platform.runLater(() -> {
                                         HBox hBox = new HBox();
                                         HBox hBox1 = new HBox();
@@ -554,10 +567,12 @@ class DigiMenuListener {
                                         grid.getStyleClass().add("radiobuttons");
                                         Button btn = new Button("Érkeztet");
                                         class PreViewGroup extends ToggleGroup {
+
                                             public File file;
+
                                             public PreViewGroup(File file) {
                                                 super();
-                                                this.file=file;
+                                                this.file = file;
                                             }
                                         }
                                         PreViewGroup tg = new PreViewGroup(file);
@@ -573,36 +588,42 @@ class DigiMenuListener {
                                         btn.setOnMousePressed(new EventHandler<MouseEvent>() {
                                             @Override
                                             public void handle(MouseEvent mouseEvent) {
-                                                if (mouseEvent.isPrimaryButtonDown() && tg.getSelectedToggle()!=null) {
-                                                    File f= new File(ARCHIVE1);
+                                                if (mouseEvent.isPrimaryButtonDown() && tg.getSelectedToggle() != null) {
+                                                    File f = new File(ARCHIVE1);
                                                     try {
-                                                        Timestamp timeStamp=new Timestamp(System.currentTimeMillis());                                                        
-                                                        if (!f.exists()) f.mkdir();
-                                                        f=new File(ARCHIVE1+"/"+timeStamp.getTime()+".dg");
-                                                        Files.copy(tg.file.toPath(), f.toPath());                                        
-                                                        f= new File(ARCHIVE2);
-                                                        if (!f.exists()) f.mkdir();
-                                                        f=new File(ARCHIVE2);
-                                                        if (!f.exists()) f.mkdir();
-                                                        f=new File(ARCHIVE2+"/"+timeStamp.getTime()+".dg");
-                                                        Files.copy(tg.file.toPath(), f.toPath());               
-                                                        user.getConnects().storeInArchive(
-                                                                tg.file.getName(), 
-                                                                timeStamp, 
+                                                        Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
+                                                        if (!f.exists()) {
+                                                            f.mkdir();
+                                                        }
+                                                        f = new File(ARCHIVE1 + "/" + timeStamp.getTime() + ".dg");
+                                                        Files.copy(tg.file.toPath(), f.toPath());
+                                                        f = new File(ARCHIVE2);
+                                                        if (!f.exists()) {
+                                                            f.mkdir();
+                                                        }
+                                                        f = new File(ARCHIVE2);
+                                                        if (!f.exists()) {
+                                                            f.mkdir();
+                                                        }
+                                                        f = new File(ARCHIVE2 + "/" + timeStamp.getTime() + ".dg");
+                                                        Files.copy(tg.file.toPath(), f.toPath());
+                                                        connects.storeInArchive(
+                                                                tg.file.getName(),
+                                                                timeStamp,
                                                                 Integer.parseInt(tg.getSelectedToggle().getUserData().toString()));
 
                                                         hBox.setVisible(false);
                                                         hBox.getChildren().clear();
                                                         hBox.setStyle("-fx-border-insets:0px; -fx-background-insets:0px; -fx-padding:0;");
-                                                        Files.delete(tg.file.toPath());               
-                                                        LOGGER.log(Level.INFO, f.getAbsolutePath()+" is stored.");
+                                                        Files.delete(tg.file.toPath());
+                                                        LOGGER.log(Level.INFO, f.getAbsolutePath() + " is stored.");
                                                     } catch (IOException ex) {
-                                                        LOGGER.log(Level.SEVERE, f.getAbsolutePath()+" isn't stored: "+ex.getMessage());
+                                                        LOGGER.log(Level.SEVERE, f.getAbsolutePath() + " isn't stored: " + ex.getMessage());
                                                     }
                                                 }
                                             }
                                         });
-                                       
+
                                         grid.add(btn, 0, i + 1);
 
                                         hBox2.getChildren().addAll(grid);
@@ -617,10 +638,9 @@ class DigiMenuListener {
                                         counter++;
 
                                     });
-                                    } catch (IOException e) {
+                                } catch (IOException e) {
                                     LOGGER.log(Level.SEVERE, e.getMessage());
-                                } 
-
+                                }
 
                             }
                             return null;
@@ -638,14 +658,14 @@ class DigiMenuListener {
 
                     VBox vBox = new VBox();
                     vBox.getStyleClass().add("vbox");
-                    DigiCalendar calendar=new DigiCalendar(YearMonth.now());
+                    DigiCalendar calendar = new DigiCalendar(YearMonth.now());
                     vBox.getChildren().add(calendar.getView());
                     cleanScrollPane.setContent(vBox);
                     //</editor-fold>
                 } else if (selected.equals(MENU_QUIT)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_QUIT">
                     LOGGER.log(Level.INFO, "Program terminated.");
-                    user.getConnects().close();
+                    connects.close();
                     System.exit(0);
                     //</editor-fold>
                 }

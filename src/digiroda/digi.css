@@ -91,20 +91,6 @@ limitations under the License.
     -fx-padding: 5 5 5 0;  
 }
 
-.button2 {
-    -fx-background-color: 
-        linear-gradient(#ffd65b, #e68400),
-        linear-gradient(#ffef84, #f2ba44),
-        linear-gradient(#ffea6a, #efaa22),
-        linear-gradient(#ffe657 0%, #f8c202 50%, #eea10b 100%),
-        linear-gradient(from 0% 0% to 15% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
-    -fx-background-radius: 30;
-    -fx-background-insets: 0,1,2,3,0;
-    -fx-text-fill: #654b00;
-    -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,1 ), 15, 0, 0, 0);
-}
 .button {
     -fx-background-color: 
         rgba(0,0,0,0.08),
@@ -132,8 +118,14 @@ limitations under the License.
 
 .padding10 {    
     -fx-padding: 10;
+    
 }
 
 .padding10right {
     -fx-padding: 0 10 0 0;
+}
+
+.sp10 {
+    -fx-hgap: 20px;
+    -fx-vgap: 10px;     
 }

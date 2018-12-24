@@ -21,6 +21,8 @@ import static digiroda.DigiController.LOGGER;
 import static digiroda.DigiController.user;
 import java.util.logging.Level;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
@@ -28,6 +30,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 
 
@@ -48,6 +51,12 @@ public class DigIroda extends Application {
         stage.setHeight(bounds.getHeight());
         
         stage.show();
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+          public void handle(WindowEvent we) {
+              Platform.exit();
+          }
+        });
+        
     }
 
     public static void main(String[] args) {
@@ -57,6 +66,7 @@ public class DigIroda extends Application {
       finally {
           if (user!=null) if (user.getConnects()!=null) user.getConnects().close();
           LOGGER.log(Level.INFO,"Program terminated.");
+          Platform.exit();
       }
     }
     

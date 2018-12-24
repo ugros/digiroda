@@ -23,7 +23,7 @@ import javafx.util.Pair;
 import ussoft.USDialogs;
 import static digiroda.DigiController.language;
 import static digiroda.DigiController.config;
-import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Level;
 
 public class DigiUser extends ussoft.User {
@@ -47,7 +47,7 @@ public class DigiUser extends ussoft.User {
     }
     
     public boolean checkRight(String right) {
-        return rights.contains(right);
+        return rights.contains(right);       
     }
 
     @Override
@@ -56,8 +56,8 @@ public class DigiUser extends ussoft.User {
     }
 
     @Override
-    protected HashSet<String> getRights() {  
-        HashSet<String> s = CONNECTS.getUserRights(this.userName);
+    protected List<String> getRights() {  
+        List<String> s = CONNECTS.getUserRights(this.userName);
         return s;
     }
 

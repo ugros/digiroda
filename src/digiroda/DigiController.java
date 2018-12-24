@@ -44,6 +44,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -277,7 +278,7 @@ public class DigiController implements Initializable {
            LOGGER.log(Level.SEVERE,"System exit (1): Error while checking user.");
            USDialogs.warning(language.getProperty("DATABASE_ERROR_TITLE"), language.getProperty("USERCHECK_ERROR_TEXT"));
            connects.close();
-           System.exit(1);
+           Platform.exit();
         }
     }
 }

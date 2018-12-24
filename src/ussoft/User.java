@@ -3,8 +3,10 @@
  */
 package ussoft;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,7 +17,7 @@ public abstract class User {
 	
 	protected String userName;
 	protected String password;
-	protected Set<String> rights= new HashSet<>();
+	protected List<String> rights= new ArrayList();
 	protected boolean checked=false;
 
 	protected User() {
@@ -40,7 +42,7 @@ public abstract class User {
 	}
 	
 	protected abstract boolean checkUser();
-	protected abstract Set<String> getRights();
+	protected abstract List<String> getRights();
         protected abstract void initialize();
 	
 	public String getUserName() {

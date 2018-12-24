@@ -43,6 +43,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -62,10 +63,13 @@ import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
@@ -80,11 +84,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 import ussoft.USDialogs;
 
 /**
@@ -114,7 +120,7 @@ class DigiMenuListener {
     final static String MENU_SETRIGHTS = language.getProperty("MENU_SETRIGHTS");
     final static String MENU_ARRIVE = language.getProperty("MENU_ARRIVE");
     final static String MENU_CALENDAR = language.getProperty("MENU_CALENDAR");
-    final static DigiDB connects=user.getConnects();
+    final static DigiDB connects = user.getConnects();
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Constants of columnnames">
     final static String COLUMN_COMPANYNAME = language.getProperty("COLUMN_COMPANYNAME");
@@ -224,92 +230,97 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_SHOWCONTACTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SHOWCONTACTS">
-                    cleanScrollPane.setVisible(false);
-                    cleanAnchorPane.setVisible(false);
-                    cleanStackPane.setVisible(false);
-                    contactsSplitP.setVisible(true);
-                    contactsTable.getColumns().clear();
+                    if (user.checkRight("opencontacts")) {
+                        cleanScrollPane.setVisible(false);
+                        cleanAnchorPane.setVisible(false);
+                        cleanStackPane.setVisible(false);
+                        contactsSplitP.setVisible(true);
+                        contactsTable.getColumns().clear();
+                        
+                        ObservableList<DigiContacts> tableList = connects.getContacts();
 
-                    ObservableList<DigiContacts> tableList = connects.getContacts();
+                        TableColumn companyN = new TableColumn(COLUMN_COMPANYNAME);
+                        companyN.setMinWidth(150);
+                        companyN.setCellFactory(TextFieldTableCell.forTableColumn());
+                        companyN.setCellValueFactory(new PropertyValueFactory<>("companyName"));
+                        companyN.setOnEditCommit(DigiHandlers.companyNOnEditCommit());
 
-                    TableColumn companyN = new TableColumn(COLUMN_COMPANYNAME);
-                    companyN.setMinWidth(150);
-                    companyN.setCellFactory(TextFieldTableCell.forTableColumn());
-                    companyN.setCellValueFactory(new PropertyValueFactory<>("companyName"));
-                    companyN.setOnEditCommit(DigiHandlers.companyNOnEditCommit());
+                        TableColumn familyN = new TableColumn(COLUMN_FAMILYNAME);
+                        familyN.setMinWidth(150);
+                        familyN.setCellFactory(TextFieldTableCell.forTableColumn());
+                        familyN.setCellValueFactory(new PropertyValueFactory<>("familyName"));
+                        familyN.setOnEditCommit(DigiHandlers.familyNOnEditCommit());
 
-                    TableColumn familyN = new TableColumn(COLUMN_FAMILYNAME);
-                    familyN.setMinWidth(150);
-                    familyN.setCellFactory(TextFieldTableCell.forTableColumn());
-                    familyN.setCellValueFactory(new PropertyValueFactory<>("familyName"));
-                    familyN.setOnEditCommit(DigiHandlers.familyNOnEditCommit());
+                        TableColumn firstN = new TableColumn(COLUMN_FIRSTNAME);
+                        firstN.setMinWidth(150);
+                        firstN.setCellFactory(TextFieldTableCell.forTableColumn());
+                        firstN.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+                        firstN.setOnEditCommit(DigiHandlers.firstNOnEditCommit());
 
-                    TableColumn firstN = new TableColumn(COLUMN_FIRSTNAME);
-                    firstN.setMinWidth(150);
-                    firstN.setCellFactory(TextFieldTableCell.forTableColumn());
-                    firstN.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-                    firstN.setOnEditCommit(DigiHandlers.firstNOnEditCommit());
+                        TableColumn phoneN = new TableColumn(COLUMN_PHONENUMBER);
+                        phoneN.setMinWidth(100);
+                        phoneN.setCellFactory(TextFieldTableCell.forTableColumn());
+                        phoneN.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+                        phoneN.setOnEditCommit(DigiHandlers.phoneNOnEditCommit());
 
-                    TableColumn phoneN = new TableColumn(COLUMN_PHONENUMBER);
-                    phoneN.setMinWidth(100);
-                    phoneN.setCellFactory(TextFieldTableCell.forTableColumn());
-                    phoneN.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
-                    phoneN.setOnEditCommit(DigiHandlers.phoneNOnEditCommit());
+                        TableColumn email = new TableColumn(COLUMN_EMAIL);
+                        email.setMinWidth(100);
+                        email.setCellFactory(TextFieldTableCell.forTableColumn());
+                        email.setCellValueFactory(new PropertyValueFactory<>("email"));
+                        email.setOnEditCommit(DigiHandlers.emailOnEditCommit());
 
-                    TableColumn email = new TableColumn(COLUMN_EMAIL);
-                    email.setMinWidth(100);
-                    email.setCellFactory(TextFieldTableCell.forTableColumn());
-                    email.setCellValueFactory(new PropertyValueFactory<>("email"));
-                    email.setOnEditCommit(DigiHandlers.emailOnEditCommit());
+                        TableColumn country = new TableColumn(COLUMN_COUNTRY);
+                        country.setMinWidth(150);
+                        country.setCellFactory(TextFieldTableCell.forTableColumn());
+                        country.setCellValueFactory(new PropertyValueFactory<>("country"));
+                        country.setOnEditCommit(DigiHandlers.countryOnEditCommit());
 
-                    TableColumn country = new TableColumn(COLUMN_COUNTRY);
-                    country.setMinWidth(150);
-                    country.setCellFactory(TextFieldTableCell.forTableColumn());
-                    country.setCellValueFactory(new PropertyValueFactory<>("country"));
-                    country.setOnEditCommit(DigiHandlers.countryOnEditCommit());
+                        TableColumn city = new TableColumn(COLUMN_CITY);
+                        city.setMinWidth(150);
+                        city.setCellFactory(TextFieldTableCell.forTableColumn());
+                        city.setCellValueFactory(new PropertyValueFactory<>("city"));
+                        city.setOnEditCommit(DigiHandlers.cityOnEditCommit());
 
-                    TableColumn city = new TableColumn(COLUMN_CITY);
-                    city.setMinWidth(150);
-                    city.setCellFactory(TextFieldTableCell.forTableColumn());
-                    city.setCellValueFactory(new PropertyValueFactory<>("city"));
-                    city.setOnEditCommit(DigiHandlers.cityOnEditCommit());
+                        TableColumn postalC = new TableColumn(COLUMN_POSTALCODE);
+                        postalC.setMinWidth(150);
+                        postalC.setCellFactory(TextFieldTableCell.forTableColumn());
+                        postalC.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+                        postalC.setOnEditCommit(DigiHandlers.postalCOnEditCommit());
 
-                    TableColumn postalC = new TableColumn(COLUMN_POSTALCODE);
-                    postalC.setMinWidth(150);
-                    postalC.setCellFactory(TextFieldTableCell.forTableColumn());
-                    postalC.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
-                    postalC.setOnEditCommit(DigiHandlers.postalCOnEditCommit());
+                        TableColumn adress = new TableColumn(COLUMN_ADRESS);
+                        adress.setMinWidth(150);
+                        adress.setCellFactory(TextFieldTableCell.forTableColumn());
+                        adress.setCellValueFactory(new PropertyValueFactory<>("adress"));
+                        adress.setOnEditCommit(DigiHandlers.adressOnEditCommit());
 
-                    TableColumn adress = new TableColumn(COLUMN_ADRESS);
-                    adress.setMinWidth(150);
-                    adress.setCellFactory(TextFieldTableCell.forTableColumn());
-                    adress.setCellValueFactory(new PropertyValueFactory<>("adress"));
-                    adress.setOnEditCommit(DigiHandlers.adressOnEditCommit());
+                        contactsTable.getColumns().addAll(companyN, familyN, firstN, phoneN, email, country, city, postalC, adress);
+                        contactsTable.setEditable(true);
 
-                    contactsTable.getColumns().addAll(companyN, familyN, firstN, phoneN, email, country, city, postalC, adress);
-                    contactsTable.setEditable(true);
-
-                    FilteredList<DigiContacts> filteredList = new FilteredList<>(tableList);
-                    filterT.textProperty().addListener((observable2, oldValue2, newValue2) -> {
-                        filteredList.setPredicate(
-                                new Predicate<DigiContacts>() {
-                            public boolean test(DigiContacts t) {
-                                if (t.getFamilyName().toUpperCase().contains(filterT.getText().toUpperCase())
-                                        || t.getFirstName().toUpperCase().contains(filterT.getText().toUpperCase())) {
-                                    return true;
-                                } else {
-                                    return false;
+                        FilteredList<DigiContacts> filteredList = new FilteredList<>(tableList);
+                        filterT.textProperty().addListener((observable2, oldValue2, newValue2) -> {
+                            filteredList.setPredicate(
+                                    new Predicate<DigiContacts>() {
+                                public boolean test(DigiContacts t) {
+                                    if (t.getFamilyName().toUpperCase().contains(filterT.getText().toUpperCase())
+                                            || t.getFirstName().toUpperCase().contains(filterT.getText().toUpperCase())) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
                                 }
-                            }
+                            });
                         });
-                    });
 
-                    contactsTable.setItems(filteredList);
-                    contactsTable.blendModeProperty();
+                        contactsTable.setItems(filteredList);
+                        contactsTable.blendModeProperty();
 
-                    contactsTable.minWidthProperty().bind(dataP.widthProperty());
-                    contactsTable.maxWidthProperty().bind(dataP.widthProperty());
-                    LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked contacts.");
+                        contactsTable.minWidthProperty().bind(dataP.widthProperty());
+                        contactsTable.maxWidthProperty().bind(dataP.widthProperty());
+                        LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked contacts.");
+                    } else {
+                        LOGGER.log(Level.WARNING, user.getUserName() + " tried to check contacts.");
+                        USDialogs.warning(TEXT_NOTALLOWED_HEAD, TEXT_NOTALLOWED_TEXT);
+                    }
                     //</editor-fold>
                 } else if (selected.equals(MENU_SETTINGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETTINGS">
@@ -321,124 +332,201 @@ class DigiMenuListener {
                     //</editor-fold>  
                 } else if (selected.equals(MENU_CREATEUSER)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_CREATEUSER">
-                    contactsSplitP.setVisible(false);
-                    cleanScrollPane.setVisible(false);
-                    cleanAnchorPane.setVisible(false);
-                    cleanStackPane.setVisible(true);
-                    cleanStackPane.getChildren().clear();
-                    VBox vBox = new VBox();
-                    GridPane grid1 = new GridPane();
-                    grid1.getStyleClass().clear();
-                    grid1.getStyleClass().addAll("sp10", "hbox");
-                    Label label1 = new Label("Felhasználónév");
-                    grid1.add(label1, 1, 1);
-                    TextField userName = new TextField();
-                    grid1.add(userName, 2, 1);
-                    Label label2 = new Label("Jelszó");
-                    grid1.add(label2, 1, 2);
-                    TextField password = new TextField();
-                    grid1.add(password, 2, 2);
-                    Label label3 = new Label("Vezetéknév");
-                    grid1.add(label3, 1, 3);
-                    TextField familyName = new TextField();
-                    grid1.add(familyName, 2, 3);
-                    Label label4 = new Label("Keresztnév");
-                    grid1.add(label4, 1, 4);
-                    TextField firstName = new TextField();
-                    grid1.add(firstName, 2, 4);
-                    Label label5 = new Label("Szervezeti egység");
-                    grid1.add(label5, 1, 5);
-                    TextField division = new TextField();
-                    grid1.add(division, 2, 5);
-                    GridPane grid2 = new GridPane();
-                    grid2.getStyleClass().addAll("sp10", "hbox");
-                    List<DigiDB.CheckBoxStringAndId> list = connects.getAllOfRights();
-                    int i;
-                    for (i = 0; i < list.size(); i++) {
-                        CheckBox cb = list.get(i).getCheckBox();
-                        cb.setMinWidth((int) cleanStackPane.getWidth() / 5);
-                        grid2.add(cb, i % 5, (int) i / 5);
-                    }
+                    if (user.checkRight("addusers")) {
+                        Stage secondStage = new Stage();
+                        StackPane cleanStackPane = new StackPane();
+                        Scene secondScene = new Scene(cleanStackPane);
+                        secondStage.setScene(secondScene);
+                        secondStage.show();
+                        secondStage.setTitle(MENU_CREATEUSER);
+                        secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
 
-                    Button btn = new Button("Létrehoz");
-                    btn.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent e) {
-                            int id = connects.createUser(familyName.getText(), firstName.getText(), userName.getText(), Integer.parseInt(division.getText()), password.getText());
-                            connects.addRights(id, list);
+                        VBox vBox = new VBox();
+                        GridPane grid1 = new GridPane();
+                        grid1.getStyleClass().clear();
+                        grid1.getStyleClass().addAll("sp10", "hbox");
+                        Label label1 = new Label("Felhasználónév");
+                        grid1.add(label1, 1, 1);
+                        TextField userName = new TextField();
+                        grid1.add(userName, 2, 1);
+                        Label label2 = new Label("Jelszó");
+                        grid1.add(label2, 1, 2);
+                        TextField password = new TextField();
+                        grid1.add(password, 2, 2);
+                        Label label3 = new Label("Vezetéknév");
+                        grid1.add(label3, 1, 3);
+                        TextField familyName = new TextField();
+                        grid1.add(familyName, 2, 3);
+                        Label label4 = new Label("Keresztnév");
+                        grid1.add(label4, 1, 4);
+                        TextField firstName = new TextField();
+                        grid1.add(firstName, 2, 4);
+                        Label label5 = new Label("Szervezeti egység");
+                        grid1.add(label5, 1, 5);
+                        TextField division = new TextField();
+                        grid1.add(division, 2, 5);
+                        GridPane grid2 = new GridPane();
+                        grid2.getStyleClass().addAll("sp10", "hbox");
+                        List<DigiDB.CheckBoxStringAndId> list = connects.getAllOfRights();
+                        int i;
+                        for (i = 0; i < list.size(); i++) {
+                            CheckBox cb = list.get(i).getCheckBox();
+                            cb.setMinWidth((int) cleanStackPane.getWidth() / 5 - 20);
+                            cb.setMaxWidth((int) cleanStackPane.getWidth() / 5 - 20);
+                            grid2.add(cb, i % 5, (int) i / 5);
                         }
-                    });
-                    grid1.add(btn, 2, 6);
-                    vBox.getChildren().addAll(grid1, grid2);
-                    cleanStackPane.getChildren().add(vBox);
 
+                        Button btn = new Button("Létrehoz");
+                        btn.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent e) {
+                                int id = connects.createUser(familyName.getText(), firstName.getText(), userName.getText(), Integer.parseInt(division.getText()), password.getText());
+                                connects.addRights(id, list);
+                                LOGGER.log(Level.INFO, user.getUserName() + " created user: "+id);
+                                USDialogs.information(language.getProperty("MESSAGE"), language.getProperty("READY"));
+                            }
+                        });
+                        grid1.add(btn, 2, 6);
+                        vBox.getChildren().addAll(grid1, grid2);
+                        cleanStackPane.getChildren().add(vBox);
+                    } else {
+                        LOGGER.log(Level.WARNING, user.getUserName() + " tried to create a new user.");
+                        USDialogs.warning(TEXT_NOTALLOWED_HEAD, TEXT_NOTALLOWED_TEXT);
+                    }
                     //</editor-fold>  
                 } else if (selected.equals(MENU_SETRIGHTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SETRIGHTS">
-
-                    //</editor-fold>  
-                } else if (selected.equals(MENU_OPTIONS)) {
-                    //<editor-fold defaultstate="collapsed" desc="MENU_OPTIONS">
-                    cleanAnchorPane.setVisible(false);
-                    cleanStackPane.setVisible(false);
-                    contactsSplitP.setVisible(false);
-                    cleanScrollPane.setVisible(true);
-                    VBox vBox = new VBox();
-                    TableView table = new TableView();
-
-                    ObservableList<Settings> tableList = FXCollections.observableArrayList();
-                    config.forEach((key, value) -> {
-                        tableList.add(new Settings((String) key, (String) value));
-                    });
-
-                    TableColumn colKey = new TableColumn(language.getProperty("COLUMN_KEY"));
-                    colKey.setMinWidth(150);
-                    colKey.setCellFactory(TextFieldTableCell.forTableColumn());
-                    colKey.setCellValueFactory(new PropertyValueFactory<>("key"));
-                    colKey.setOnEditCommit(colKeyCommit());
-
-                    TableColumn colValue = new TableColumn(language.getProperty("COLUMN_VALUE"));
-                    colValue.setMinWidth(150);
-                    colValue.setCellFactory(TextFieldTableCell.forTableColumn());
-                    colValue.setCellValueFactory(new PropertyValueFactory<>("value"));
-                    colValue.setOnEditCommit(colValueCommit());
-
-                    table.getColumns().addAll(colKey, colValue);
-                    table.setEditable(true);
-                    Label label = new Label(language.getProperty("TEXT_FILTER"));
-                    TextField filter = new TextField();
-                    FilteredList<Settings> filteredList = new FilteredList<>(tableList);
-                    filter.textProperty().addListener((observable2, oldValue2, newValue2) -> {
-                        filteredList.setPredicate(
-                                new Predicate<Settings>() {
-                            public boolean test(Settings t) {
-                                if (t.getKey().toUpperCase().contains(filter.getText().toUpperCase())
-                                        || t.getValue().toUpperCase().contains(filter.getText().toUpperCase())) {
-                                    return true;
-                                } else {
-                                    return false;
+                    if (user.checkRight("addusers")) {
+                        Stage secondStage = new Stage();
+                        StackPane cleanStackPane = new StackPane();
+                        Scene secondScene = new Scene(cleanStackPane);
+                        secondStage.setScene(secondScene);
+                        secondStage.show();
+                        secondStage.setTitle(MENU_SETRIGHTS);
+                        secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
+                        VBox vBox = new VBox();
+                        GridPane grid1 = new GridPane();
+                        
+                        ChoiceBox chb = new ChoiceBox(FXCollections.observableList(
+                                connects.getAllOfUserNames())
+                        );
+                        
+                        List<DigiDB.CheckBoxStringAndId> list = connects.getAllOfRights();
+                        GridPane grid2 = new GridPane();
+                        grid2.getStyleClass().addAll("sp10", "hbox");
+                        int i;
+                        for (i = 0; i < list.size(); i++) {
+                            CheckBox cb = list.get(i).getCheckBox();
+                            grid2.add(cb, i % 5, (int) i / 5);
+                            cb.setMinWidth((int) cleanStackPane.getWidth() / 5 -20);
+                            cb.setMaxWidth((int) cleanStackPane.getWidth() / 5 - 20);
+                        }
+                        chb.addEventHandler(EventType.ROOT, new EventHandler() {
+                            @Override
+                            public void handle(Event event) {
+                               
+                                if (event.getEventType().getName().equalsIgnoreCase("COMBO_BOX_BASE_ON_HIDING")) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        CheckBox cb = list.get(i).getCheckBox();
+                                        if (chb.getValue()!=null)
+                                        if (connects.getUserRights(chb.getValue().toString()).contains(cb.getText())) {
+                                            cb.setSelected(true);
+                                        } else {
+                                            cb.setSelected(false);
+                                        }
+                                    }
                                 }
                             }
                         });
-                    });
-                    table.setItems(filteredList);
-                    HBox hBox = new HBox();
-                    hBox.getChildren().addAll(label, filter);
-                    vBox.getChildren().addAll(hBox, table);
-                    hBox.getStyleClass().add("hbox");
-                    vBox.getStyleClass().add("vbox");
-                    label.getStyleClass().add("padding10right");
-                    cleanScrollPane.setContent(vBox);
+                        grid1.add(chb, 1, 1);
 
-                    table.minWidthProperty().bind(cleanScrollPane.widthProperty());
-                    table.maxWidthProperty().bind(cleanScrollPane.widthProperty());
-                    LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked options.");
+                        Button btn = new Button("Rögzít");
+                        btn.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent e) {
+                                if (chb.getValue()!=null) {                                   
+                                   int id = connects.getUserId(chb.getValue().toString());  
+                                   connects.deleteRights(id);
+                                   connects.addRights(id, list);
+                                   LOGGER.log(Level.INFO, user.getUserName() + " changed rights of user: "+id);
+                                   USDialogs.information(language.getProperty("MESSAGE"), language.getProperty("READY"));
+                                }
+                            }
+                        });
+                        grid1.add(btn, 2, 1);
+                        vBox.getChildren().addAll(grid1, grid2);
+                        cleanStackPane.getChildren().add(vBox);
+                    } else {
+                        LOGGER.log(Level.WARNING, user.getUserName() + " tried to set user's rights.");
+                        USDialogs.warning(TEXT_NOTALLOWED_HEAD, TEXT_NOTALLOWED_TEXT);
+                    }
+                    //</editor-fold>  
+                } else if (selected.equals(MENU_OPTIONS)) {
+                    //<editor-fold defaultstate="collapsed" desc="MENU_OPTIONS">
+                    if (user.checkRight("manageoptions")) {
+                        cleanAnchorPane.setVisible(false);
+                        cleanStackPane.setVisible(false);
+                        contactsSplitP.setVisible(false);
+                        cleanScrollPane.setVisible(true);
+                        VBox vBox = new VBox();
+                        TableView table = new TableView();
+
+                        ObservableList<Settings> tableList = FXCollections.observableArrayList();
+                        config.forEach((key, value) -> {
+                            tableList.add(new Settings((String) key, (String) value));
+                        });
+
+                        TableColumn colKey = new TableColumn(language.getProperty("COLUMN_KEY"));
+                        colKey.setMinWidth(150);
+                        colKey.setCellFactory(TextFieldTableCell.forTableColumn());
+                        colKey.setCellValueFactory(new PropertyValueFactory<>("key"));
+                        colKey.setOnEditCommit(colKeyCommit());
+
+                        TableColumn colValue = new TableColumn(language.getProperty("COLUMN_VALUE"));
+                        colValue.setMinWidth(150);
+                        colValue.setCellFactory(TextFieldTableCell.forTableColumn());
+                        colValue.setCellValueFactory(new PropertyValueFactory<>("value"));
+                        colValue.setOnEditCommit(colValueCommit());
+
+                        table.getColumns().addAll(colKey, colValue);
+                        table.setEditable(true);
+                        Label label = new Label(language.getProperty("TEXT_FILTER"));
+                        TextField filter = new TextField();
+                        FilteredList<Settings> filteredList = new FilteredList<>(tableList);
+                        filter.textProperty().addListener((observable2, oldValue2, newValue2) -> {
+                            filteredList.setPredicate(
+                                    new Predicate<Settings>() {
+                                public boolean test(Settings t) {
+                                    if (t.getKey().toUpperCase().contains(filter.getText().toUpperCase())
+                                            || t.getValue().toUpperCase().contains(filter.getText().toUpperCase())) {
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            });
+                        });
+                        table.setItems(filteredList);
+                        HBox hBox = new HBox();
+                        hBox.getChildren().addAll(label, filter);
+                        vBox.getChildren().addAll(hBox, table);
+                        hBox.getStyleClass().add("hbox");
+                        vBox.getStyleClass().add("vbox");
+                        label.getStyleClass().add("padding10right");
+                        cleanScrollPane.setContent(vBox);
+
+                        table.minWidthProperty().bind(cleanScrollPane.widthProperty());
+                        table.maxWidthProperty().bind(cleanScrollPane.widthProperty());
+                        LOGGER.log(Level.FINE, "User " + user.getUserName() + " managed options.");
+                    } else {
+                        LOGGER.log(Level.WARNING, user.getUserName() + " tried to set options.");
+                        USDialogs.warning(TEXT_NOTALLOWED_HEAD, TEXT_NOTALLOWED_TEXT);
+                    }
                     //</editor-fold>
                 } else if (selected.equals(MENU_LOGS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_LOGS">
                     if (user.checkRight("checklog")) {
                         WebView webView = new WebView();
-                        final WebEngine webEngine = webView.getEngine();
                         FileChooser fileChooser = new FileChooser();
                         fileChooser.setTitle(language.getProperty("TITLE_LOG"));
                         fileChooser.setInitialDirectory(new File(config.getProperty("LOGDIR")));
@@ -446,15 +534,16 @@ class DigiMenuListener {
                         File f = fileChooser.showOpenDialog(null);
                         if (f != null) {
                             try {
-                                //webEngine.load(f.toURI().toString());
                                 String content = readFile(f.getPath(), StandardCharsets.UTF_8);
                                 webView.getEngine().loadContent(content, "text/html");
-                                contactsSplitP.setVisible(false);
-                                cleanScrollPane.setVisible(false);
-                                cleanAnchorPane.setVisible(false);
-                                cleanStackPane.setVisible(true);
+                                Stage secondStage = new Stage();
+                                StackPane cleanStackPane = new StackPane();
+                                Scene secondScene = new Scene(cleanStackPane);
+                                secondStage.setScene(secondScene);
+                                secondStage.show();
+                                secondStage.setTitle(MENU_LOGS);
+                                secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
                                 cleanStackPane.getChildren().add(webView);
-                                cleanStackPane.autosize();
                                 LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked log file: " + f.getAbsolutePath());
                             } catch (IOException ex) {
                                 Logger.getLogger(DigiMenuListener.class.getName()).log(Level.SEVERE, null, ex);
@@ -476,15 +565,16 @@ class DigiMenuListener {
                         File f = new File(fileName);
                         if (f != null) {
                             try {
-                                //webEngine.load(f.toURI().toString());
                                 String content = readFile(f.getPath(), StandardCharsets.UTF_8);
                                 webView.getEngine().loadContent(content, "text/html");
-                                contactsSplitP.setVisible(false);
-                                cleanScrollPane.setVisible(false);
-                                cleanAnchorPane.setVisible(false);
-                                cleanStackPane.setVisible(true);
+                                Stage secondStage = new Stage();
+                                StackPane cleanStackPane = new StackPane();
+                                Scene secondScene = new Scene(cleanStackPane);
+                                secondStage.setScene(secondScene);
+                                secondStage.show();
+                                secondStage.setTitle(MENU_ACTUALLOG);
+                                secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
                                 cleanStackPane.getChildren().add(webView);
-                                cleanStackPane.autosize();
                                 LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked log file: " + f.getAbsolutePath());
                             } catch (IOException ex) {
                                 Logger.getLogger(DigiMenuListener.class.getName()).log(Level.SEVERE, null, ex);
@@ -666,7 +756,8 @@ class DigiMenuListener {
                     //<editor-fold defaultstate="collapsed" desc="MENU_QUIT">
                     LOGGER.log(Level.INFO, "Program terminated.");
                     connects.close();
-                    System.exit(0);
+                    Platform.exit();
+                   // System.exit(0);
                     //</editor-fold>
                 }
             }

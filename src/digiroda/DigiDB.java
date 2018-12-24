@@ -42,10 +42,9 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.application.Platform;
 import javafx.scene.control.CheckBox;
 
 /**
@@ -58,6 +57,7 @@ import javafx.scene.control.CheckBox;
 public class DigiDB {
 
     class StringAndId {
+        //<editor-fold defaultstate="collapsed" desc="code">
 
         private String text;
         private Integer id;
@@ -76,7 +76,9 @@ public class DigiDB {
         }
     }
 
+    //</editor-fold>
     class CheckBoxStringAndId extends StringAndId {
+        //<editor-fold defaultstate="collapsed" desc="code">    
 
         private CheckBox checkBox;
 
@@ -89,9 +91,11 @@ public class DigiDB {
             return this.checkBox;
         }
     }
+    //</editor-fold>
 
     private final String[] checkList = {"digischema", "archive", "flows", "relations", "statuscodes", "files", "companies", "contactpersons", "rights", "userrights", "users", "divisions"};
-    private final String[] rightList = {"opencontacts","addcontact","readlogs","addusers","checklog"};
+    private final String[] rightList = {"opencontacts", "addcontact", "manageoptions", "addusers", "checklog"};
+    //<editor-fold defaultstate="collapsed" desc="+fields">
     private final Connection localDB;
     private final Connection mainDB;
     private final String LOCALHOST;
@@ -102,6 +106,7 @@ public class DigiDB {
     private final TableView table = new TableView();
     private ResultSet rs;
     ObservableList<String[]> dataRows = FXCollections.observableArrayList();
+    //</editor-fold>
 
     /**
      * It returns with a connection of localDB
@@ -129,7 +134,9 @@ public class DigiDB {
      * @param password	password to main database
      */
     public DigiDB(String user, String password) {
-        String sql="";
+        //<editor-fold defaultstate="collapsed" desc="code">
+
+        String sql = "";
         MAINHOST = config.getProperty("MAINHOST");
         MAINDB = config.getProperty("MAINDB");
         mainDB = setMainDB(MAINHOST, MAINDB, user, password);
@@ -137,7 +144,7 @@ public class DigiDB {
             LOGGER.log(Level.FINE, "Connected to the main database");
             if (!checkDBTables()) {
                 if (USDialogs.confirmation(language.getProperty("CREATEDB_HEAD"), language.getProperty("CREATEDB_TEXT")).getText().equalsIgnoreCase("ok")) {
-                   
+
                     if (!dbList.contains(MAINDB)) {
                         try {
                             sql = " CREATE DATABASE " + MAINDB + " "
@@ -156,6 +163,9 @@ public class DigiDB {
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created database: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -167,6 +177,9 @@ public class DigiDB {
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created schema: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -185,6 +198,9 @@ public class DigiDB {
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of archive: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -209,11 +225,14 @@ public class DigiDB {
                                     + ""
                                     + "ALTER TABLE digischema.companies"
                                     + "    OWNER to postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of companies: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -240,11 +259,14 @@ public class DigiDB {
                                     + ""
                                     + "ALTER TABLE digischema.contactpersons"
                                     + "    OWNER to postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of contactpersons: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -271,11 +293,14 @@ public class DigiDB {
                                     + "    OWNER to postgres;"
                                     + ""
                                     + "GRANT ALL ON TABLE digischema.divisions TO postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of divisions: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -302,11 +327,14 @@ public class DigiDB {
                                     + "    OWNER to postgres;"
                                     + ""
                                     + "GRANT ALL ON TABLE digischema.files TO postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of files: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -330,11 +358,14 @@ public class DigiDB {
                                     + "    OWNER to postgres;"
                                     + ""
                                     + "GRANT ALL ON TABLE digischema.flows TO postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of flows: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -356,11 +387,14 @@ public class DigiDB {
                                     + "    OWNER to postgres;"
                                     + ""
                                     + "GRANT ALL ON TABLE digischema.relations TO postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of relations: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -379,20 +413,24 @@ public class DigiDB {
                                     + ""
                                     + "ALTER TABLE digischema.rights"
                                     + "    OWNER to postgres;"
-                                    + "INSERT INTO digischema.rights(rightname)" 
+                                    + "INSERT INTO digischema.rights(rightname)"
                                     + "	VALUES ";
-                            for  (int i=0; i<rightList.length; i++) {
-                             sql+="('"+rightList[i]+"')";
-                             if (i<rightList.length-1) 
-                                 sql+=", "; 
-                             else 
-                                 sql+=";";
+                            for (int i = 0; i < rightList.length; i++) {
+                                sql += "('" + rightList[i] + "')";
+                                if (i < rightList.length - 1) {
+                                    sql += ", ";
+                                } else {
+                                    sql += ";";
+                                }
                             }
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of rights: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -413,14 +451,17 @@ public class DigiDB {
                                     + "    OWNER to postgres;"
                                     + ""
                                     + "GRANT ALL ON TABLE digischema.statuscodes TO postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of statuscodes: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
-                    
+
                     if (!dbList.contains("users")) {
                         try {
                             sql = " CREATE TABLE digischema.users"
@@ -442,11 +483,14 @@ public class DigiDB {
                                     + "INSERT INTO digischema.users("
                                     + "	familyname, firstname, username, divisionid)"
                                     + "	VALUES ('Rendszergazda', '#1', 'postgres', 0);";
-                           
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
                         } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of users: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
 
@@ -466,44 +510,46 @@ public class DigiDB {
                                     + ""
                                     + "ALTER TABLE digischema.userrights"
                                     + "    OWNER to postgres;";
-                            
+
                             Statement st = getMainDB().createStatement();
                             st.executeUpdate(sql);
-                            
-                            sql="SELECT id FROM digischema.users where username='postgres'";
-                            
+
+                            sql = "SELECT id FROM digischema.users where username='postgres'";
+
                             Statement st2 = getMainDB().createStatement();
-                            ResultSet rs2= st2.executeQuery(sql); 
-                            int userId=0;
+                            ResultSet rs2 = st2.executeQuery(sql);
+                            int userId = 0;
                             while (rs2.next()) {
-                                userId=rs2.getInt("id");
+                                userId = rs2.getInt("id");
                             }
-                            sql="SELECT id FROM digischema.rights";
-                            
+                            sql = "SELECT id FROM digischema.rights";
+
                             Statement st3 = getMainDB().createStatement();
-                            ResultSet rs3= st3.executeQuery(sql); 
+                            ResultSet rs3 = st3.executeQuery(sql);
                             while (rs3.next()) {
                                 sql = "INSERT INTO digischema.userrights("
                                         + "	userid, rightid)"
-                                        + "	VALUES ("+userId+", "+rs3.getInt("id")+");";   
-                                
+                                        + "	VALUES (" + userId + ", " + rs3.getInt("id") + ");";
+
                                 Statement st4 = getMainDB().createStatement();
                                 st4.executeUpdate(sql);
                             }
-                            
-                            
-                        } catch (SQLException ex) {                            
+
+                        } catch (SQLException ex) {
                             LOGGER.log(Level.SEVERE, "Error while created table of userrights: " + ex.getMessage());
+                            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                                LOGGER.log(Level.INFO, sql);
+                            }
                         }
                     }
                 } else {
                     close();
-                    System.exit(0);
+                    Platform.exit();
                 }
             }
         } else {
             close();
-            System.exit(0);
+            Platform.exit();
         }
 
         LOCALHOST = config.getProperty("LOCALHOST");
@@ -513,9 +559,10 @@ public class DigiDB {
             LOGGER.log(Level.FINE, "Connected to the local database");
         } else {
             close();
-            System.exit(0);
+            Platform.exit();
         }
     }
+    //</editor-fold>
 
     /**
      * Settig up the localDB field
@@ -524,6 +571,7 @@ public class DigiDB {
      * @param database	database or schema name
      */
     private Connection setMainDB(String host, String database, String user, String password) {
+        //<editor-fold defaultstate="collapsed" desc="code">    
         try {
             LOGGER.log(Level.FINE, "Trying to connect to main database.");
             //Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();                
@@ -541,6 +589,7 @@ public class DigiDB {
         return null;
     }
 
+    //</editor-fold>
     /**
      * Settig up the localDB field
      *
@@ -548,6 +597,7 @@ public class DigiDB {
      * @param database	database or schema name
      */
     private Connection setLocalDB(String host, String database) {
+        //<editor-fold defaultstate="collapsed" desc="code">    
         try {
             LOGGER.log(Level.FINE, "Trying to connect to local database.");
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
@@ -565,11 +615,13 @@ public class DigiDB {
         return null;
     }
 
+    //</editor-fold>
     /**
      * This method closes the opened connections.
      *
      */
     public void close() {
+        //<editor-fold defaultstate="collapsed" desc="code">
         try {
             if (mainDB != null) {
                 mainDB.close();
@@ -587,65 +639,123 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, ex.getMessage());
         }
     }
+    //</editor-fold>
 
+    /**
+     * This method returns with a list of rights.
+     *
+     * @return List<CheckBoxStringAndId>
+     *
+     */
     public List<CheckBoxStringAndId> getAllOfRights() {
+        //<editor-fold defaultstate="collapsed" desc="code">
         List<CheckBoxStringAndId> allOfRights = new ArrayList<>();
         String sql = "SELECT id, rightname FROM digischema.rights;";
+        PreparedStatement st=null;
         try {
-            PreparedStatement st = getMainDB().prepareStatement(sql);
+            st = getMainDB().prepareStatement(sql);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 allOfRights.add(new CheckBoxStringAndId(rs.getString("rightname"), rs.getInt("id")));
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while reading rights: " + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
             return null;
         }
         return allOfRights;
     }
+    //</editor-fold>
 
+    /**
+     * This method adds a list of rights to a user.
+     *
+     *
+     */
     public boolean addRights(Integer userId, List<CheckBoxStringAndId> list) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+        String sql = "INSERT INTO digischema.userrights (userid, rightid) VALUES ( ?, ?);";
+        PreparedStatement st=null;
         try {
-            String sql = "INSERT INTO digischema.userrights (userid, rightid) VALUES ( ?, ?);";
-            for (CheckBoxStringAndId cb : list) {
-                System.out.println(cb.checkBox.getText());
-                System.out.println(cb.checkBox.isSelected());
+            for (CheckBoxStringAndId cb : list) {               
                 if (cb.checkBox.isSelected()) {
                     Integer rightId = cb.getId();
-                    PreparedStatement st = getMainDB().prepareStatement(sql);
+                    st = getMainDB().prepareStatement(sql);
                     st.setInt(1, userId);
                     st.setInt(2, rightId);
                     st.executeUpdate();
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(DigiDB.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, "Error while added rights: " + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
             return false;
         }
         return true;
     }
+    //</editor-fold>
 
-    public Integer getUserId(String userName) {
-        Integer userId = null;
+        /**
+     * This method deletes all rights of user.
+     *
+     *
+     */
+    public void deleteRights(Integer userId) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+        String sql = "DELETE FROM digischema.userrights WHERE userid= ?;";
+        PreparedStatement st=null;
         try {
-            String sql = "SELECT id FROM digischema.users WHERE username=?;";
-            PreparedStatement st2 = getMainDB().prepareStatement(sql);
-            st2.setString(1, userName);
-            ResultSet rs = st2.executeQuery();
+            st = getMainDB().prepareStatement(sql);
+            st.setInt(1, userId);
+            st.executeUpdate();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error while deleted rights: " + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
+        }
+    }
+    //</editor-fold>
+    
+    /**
+     * This method returns with the id of userName.
+     *
+     * @return Integer
+     *
+     */
+    public int getUserId(String userName) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+        String sql = "SELECT id FROM digischema.users WHERE username=?;";
+        Integer userId = null;
+        PreparedStatement st=null;
+        try {
+            st = getMainDB().prepareStatement(sql);
+            st.setString(1, userName);
+            ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 userId = rs.getInt("id");
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
         return userId;
     }
+    //</editor-fold>
 
     /**
      * This function creates a single user with all fields
      *
      */
     public Integer createUser(String familyName, String firstName, String userName, Integer divisionId, String password) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+        String sql = "";
         Integer userId = null;
         try {
             Pattern pu = Pattern.compile("^[a-zA-Z0-9_]*$");
@@ -653,7 +763,7 @@ public class DigiDB {
             Pattern pp = Pattern.compile("^[a-zA-Z0-9_öüóőúéáűÖÜÓŐÚÉÁŰíÍ+-@&#{}$ß<>łŁđĐ€×÷]*$");
             Matcher mp = pp.matcher(password);
             if (mu.find() && (mp.find())) {
-                String sql = "CREATE USER " + userName + " WITH PASSWORD '" + password + "'   LOGIN"
+                sql = "CREATE USER " + userName + " WITH PASSWORD '" + password + "'   LOGIN"
                         + "  NOSUPERUSER"
                         + "  INHERIT"
                         + "  CREATEDB"
@@ -667,24 +777,29 @@ public class DigiDB {
 
                 LOGGER.log(Level.INFO, "User " + userName + " is created.");
             } else {
-                USDialogs.warning("GÁZ VAN", "Ne irkájjá má' ilyen hülye karaktereket!");
+                USDialogs.warning(language.getProperty("TEXT_NOTALLOWED_HEAD"), language.getProperty("TEXT_INVALIDCHARACTER"));
                 return null;
             }
-            String sql = "INSERT INTO digischema.users(familyname, firstname, username, divisionid) VALUES (?, ?, ?, ?);";
+            sql = "INSERT INTO digischema.users(familyname, firstname, username, divisionid) VALUES (?, ?, ?, ?);";
             PreparedStatement st = getMainDB().prepareStatement(sql);
             st.setString(1, familyName);
             st.setString(2, firstName);
             st.setString(3, userName);
             st.setInt(4, divisionId);
+            sql=st.toString();
             st.executeUpdate();
 
             return getUserId(userName);
 
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, sql);
+            }
             return null;
         }
     }
+    //</editor-fold>
 
     /**
      * This function returned with a list of string and id's list for
@@ -692,25 +807,30 @@ public class DigiDB {
      *
      */
     public List<StringAndId> getRadioButtonsOFDivisions() {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         List<StringAndId> radioButtons = new ArrayList<>();
         String sql = "SELECT users.id, users.familyname, users.firstname, divisions.name as division"
                 + " FROM digischema.users, digischema.divisions "
                 + " WHERE users.id=divisions.bossid;";
-        //ToggleGroup toggleGroup = new ToggleGroup();
-        //toggleGroup.selectedToggleProperty().addListener((observable, oldVal, newVal) -> System.out.println(newVal + " was selected"));
+        PreparedStatement st = null;
         try {
-            PreparedStatement st = getMainDB().prepareStatement(sql);
+            st=getMainDB().prepareStatement(sql);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                radioButtons.add(new StringAndId(rs.getString("division") + ""
+                radioButtons.add(new StringAndId(rs.getString("division") + "\n>"
                         + rs.getString("familyname") + " " + rs.getString("firstname"),
                         rs.getInt("id")));
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while reading divisions: " + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
         return radioButtons;
     }
+    //</editor-fold>
 
     /**
      * This method makes arrived a documentum, stores in archive and creates
@@ -718,20 +838,21 @@ public class DigiDB {
      *
      */
     public void storeInArchive(String fileName, Timestamp timeStamp, Integer userId) {
-        String sql = "";
-        try {
-            sql = "INSERT INTO digischema.archive("
+        //<editor-fold defaultstate="collapsed" desc="code">
+
+        String sql = "INSERT INTO digischema.archive("
                     + "	\"timestamp\", filename)"
                     + "	VALUES (?, ?);";
-
-            PreparedStatement st = getMainDB().prepareStatement(sql);
+        PreparedStatement st = null;
+        try {
+            st=getMainDB().prepareStatement(sql);
             st.setTimestamp(1, timeStamp);
             st.setString(2, fileName);
             st.executeUpdate();
 
             sql = " SELECT id from digischema.archive where \"timestamp\"='" + timeStamp + "';";
-            PreparedStatement st1 = getMainDB().prepareStatement(sql);
-            ResultSet rs = st1.executeQuery();
+            st = getMainDB().prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
             Integer id;
             while (rs.next()) {
                 id = rs.getInt("id");
@@ -739,30 +860,36 @@ public class DigiDB {
                         + "	userid, docid, status, \"timestamp\")"
                         + "	VALUES (?, ?, ?, ?);";
 
-                PreparedStatement st2 = getMainDB().prepareStatement(sql);
-                st2.setInt(1, userId);
-                st2.setInt(2, id);
-                st2.setInt(3, 1);
-                st2.setTimestamp(4, timeStamp);
-                st2.executeUpdate();
-
+                st = getMainDB().prepareStatement(sql);
+                st.setInt(1, userId);
+                st.setInt(2, id);
+                st.setInt(3, 1);
+                st.setTimestamp(4, timeStamp);
+                st.executeUpdate();
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while stored " + fileName + " in archive: " + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
             USDialogs.warning(language.getProperty("TEXT_NOTSTORED_HEAD"), language.getProperty("TEXT_NOTSTORED_TEXT"));
         }
     }
+    //</editor-fold>  
 
     /**
      * This method checks th main database (digidb), schema (digischema) and all
      * of tables.
      */
     public boolean checkDBTables() {
-        String sql = "SELECT datname as name FROM pg_catalog.pg_database WHERE datname='"+MAINDB+"' union all "
+        //<editor-fold defaultstate="collapsed" desc="code">
+
+        String sql = "SELECT datname as name FROM pg_catalog.pg_database WHERE datname='" + MAINDB + "' union all "
                 + "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'digischema' union all "
                 + "SELECT table_name FROM information_schema.tables WHERE  table_schema = 'digischema';";
+        PreparedStatement st= null;
         try {
-            PreparedStatement st = getMainDB().prepareStatement(sql);
+            st = getMainDB().prepareStatement(sql);
             ResultSet rs = st.executeQuery();
 
             dbList = new ArrayList<>();
@@ -780,11 +907,14 @@ public class DigiDB {
 
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error while checked main database and its tables: " + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
             //USDialogs.error(language.getProperty("TEXT_MAINERROR_TITLE"), language.getProperty("TEXT_MAINERROR_TEXT"), ex.getMessage());
         }
 
         return false;
-    }
+    }//</editor-fold>
 
     /**
      * It executes a query and returns with the result, if it is;
@@ -793,16 +923,22 @@ public class DigiDB {
      * @return	USDataResult - you can simply get columns and fields
      */
     private USDataResult executeSqlToDataResult(String sql) {
+        //<editor-fold defaultstate="collapsed" desc="code"> 
+        Statement stmt=null;         
         try {
-            Statement stmt;
+            
             stmt = (Statement) localDB.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             return new USDataResult(rs);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, sql);
+            }
             return null;
         }
     }
+//</editor-fold> 
 
     /**
      * It executes a query and returns with the result, if it is;
@@ -811,6 +947,8 @@ public class DigiDB {
      * @return	ResultSet
      */
     private ResultSet executeSql(String sql) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         try {
             Statement stmt;
             stmt = (Statement) mainDB.createStatement();
@@ -819,9 +957,12 @@ public class DigiDB {
             return rs;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, sql);
+            }
         }
         return null;
-    }
+    }//</editor-fold>
 
     /**
      * It executes a query and returns with the result, if it is;
@@ -830,8 +971,10 @@ public class DigiDB {
      * @return	javafx.scene.control.TableView - you can add it to a javafx root
      */
     private TableView executeSqlToTable(String sql) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         return executeSqlToTable(sql, false);
-    }
+    }//</editor-fold>
 
     /**
      * It is a private method for executeSqlToTable method, it executes a query
@@ -842,6 +985,7 @@ public class DigiDB {
      * @return
      */
     private TableView executeSqlToTable(String sql, boolean editable) {
+        //<editor-fold defaultstate="collapsed" desc="code">
         try {
             rs = executeSql(sql);
             if (rs != null) {
@@ -867,7 +1011,7 @@ public class DigiDB {
             LOGGER.log(Level.SEVERE, ex.getMessage());
         }
         return null;
-    }
+    }//</editor-fold>
 
     /**
      * It is a method for get a set of user's rights and returns with the
@@ -876,17 +1020,19 @@ public class DigiDB {
      * @param userName
      * @return Set<String> it contains all names of user's rights.
      */
-    public HashSet<String> getUserRights(String userName) {
+    public List<String> getUserRights(String userName) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         String sql = "select rightname from digiSCHEMA.rights where rights.id in ("
                 + "select rightid from digiSCHEMA.userrights where userid=("
                 + "select id from digiSCHEMA.users where username=?))";
-        //String sql = "select rightname from digiSCHEMA.rights where rights.id in (select rightid from digiSCHEMA.userrights where userid=(select id from digiSCHEMA.users where username='ugros'))";
-        HashSet<String> result = new HashSet<>();
+        List<String> result = new ArrayList();
+        PreparedStatement st = null;
         try {
-            PreparedStatement pst = null;
-            pst = mainDB.prepareStatement(sql);
-            pst.setString(1, userName);
-            ResultSet rs = pst.executeQuery();
+            
+            st = mainDB.prepareStatement(sql);
+            st.setString(1, userName);
+            ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 result.add(rs.getString(1));
             }
@@ -894,11 +1040,40 @@ public class DigiDB {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.getMessage());
             if (LOGGER.getLevel().equals(Level.FINEST)) {
-                LOGGER.log(Level.INFO, sql);
+                LOGGER.log(Level.INFO, st.toString());
             }
             return null;
         }
-    }
+    }//</editor-fold>
+
+    /**
+     * It is a method for get a set of user's rights and returns with the
+     * result, if it is;
+     *
+     * @return List<String> it contains all names of user's.
+     */
+    public List<String> getAllOfUserNames() {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
+        String sql = "select username from digiSCHEMA.users;";
+        List<String> result = new ArrayList(); 
+        PreparedStatement st = null;
+        try {
+           
+            st = mainDB.prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                result.add(rs.getString(1));
+            }
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
+            return null;
+        }
+    }//</editor-fold>
 
     /**
      * It is a method for get a list of contacts and returns with the result in
@@ -907,6 +1082,8 @@ public class DigiDB {
      * @return ObservableList<DigiContacts>: it contains all of contacts.
      */
     public ObservableList<DigiContacts> getContacts() {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         String sql = "SELECT contactpersons.id, company, contactpersons.familyname, contactpersons.firstname, contactpersons.phonenumber, contactpersons.email, contactpersons.country, contactpersons.city, contactpersons.postalcode, contactpersons.adress FROM digischema.companies, digischema.contactpersons where contactpersons.companyid=companies.id;";
         LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked contacts.");
         ResultSet rs = executeSql(sql);
@@ -928,9 +1105,12 @@ public class DigiDB {
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, ex.toString());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, sql);
+            }
         }
         return oList;
-    }
+    }//</editor-fold>
 
     /**
      * Set familyname of a contact
@@ -939,6 +1119,8 @@ public class DigiDB {
      * @param newValue
      */
     public void setFamilyNameOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         String sql = "UPDATE digischema.contactpersons SET familyname =? WHERE id=" + id + ";";
         try {
             PreparedStatement st = mainDB.prepareStatement(sql);
@@ -947,8 +1129,11 @@ public class DigiDB {
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed familyname of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change familyname of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, sql);
+            }
         }
-    }
+    }//</editor-fold>
 
     /**
      * Set city of a contact
@@ -957,16 +1142,23 @@ public class DigiDB {
      * @param newValue
      */
     public void setCityOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         String sql = "UPDATE digischema.contactpersons SET city =? WHERE id=" + id + ";";
+        PreparedStatement st=null;
         try {
-            PreparedStatement st = mainDB.prepareStatement(sql);
+             st = mainDB.prepareStatement(sql);
             st.setString(1, newValue);
             st.executeUpdate();
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed city of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change city of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
     }
+    //</editor-fold>
 
     /**
      * Set country of a contact
@@ -975,17 +1167,23 @@ public class DigiDB {
      * @param newValue
      */
     public void setCountryOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">
         String sql = "UPDATE digischema.contactpersons SET country =? WHERE id=" + id + ";";
+        PreparedStatement st=null;
         try {
-            PreparedStatement st = mainDB.prepareStatement(sql);
+             st = mainDB.prepareStatement(sql);
             st.setString(1, newValue);
             st.executeUpdate();
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed country of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change country of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
     }
 
+    //</editor-fold>
     /**
      * Set familyname of a contact
      *
@@ -993,16 +1191,22 @@ public class DigiDB {
      * @param newValue
      */
     public void setPostalCOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">    
         String sql = "UPDATE digischema.contactpersons SET postalcode =? WHERE id=" + id + ";";
+        PreparedStatement st=null;
         try {
-            PreparedStatement st = mainDB.prepareStatement(sql);
+            st = mainDB.prepareStatement(sql);
             st.setString(1, newValue);
             st.executeUpdate();
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed postal code of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change postal code of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
     }
+    //</editor-fold>
 
     /**
      * Set firstname of a contact
@@ -1011,16 +1215,22 @@ public class DigiDB {
      * @param newValue
      */
     public void setFirstNameOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         String sql = "UPDATE digischema.contactpersons SET firstname =? WHERE id=" + id + ";";
+        PreparedStatement st=null;
         try {
-            PreparedStatement st = mainDB.prepareStatement(sql);
+            st = mainDB.prepareStatement(sql);
             st.setString(1, newValue);
             st.executeUpdate();
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed firstname of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change firstname of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
-    }
+    }//</editor-fold>
 
     /**
      * Set familyname of a contact
@@ -1029,16 +1239,22 @@ public class DigiDB {
      * @param newValue
      */
     public void setAdressOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         String sql = "UPDATE digischema.contactpersons SET adress =? WHERE id=" + id + ";";
+        PreparedStatement st=null;
         try {
-            PreparedStatement st = mainDB.prepareStatement(sql);
+            st = mainDB.prepareStatement(sql);
             st.setString(1, newValue);
             st.executeUpdate();
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed adress of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change adress of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
-    }
+    }//</editor-fold>
 
     /**
      * Set phonenumber of a contact
@@ -1047,16 +1263,21 @@ public class DigiDB {
      * @param newValue
      */
     public void setPhoneNumberOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">
         String sql = "UPDATE digischema.contactpersons SET phonenumber =? WHERE id=" + id + ";";
+        PreparedStatement st=null;
         try {
-            PreparedStatement st = mainDB.prepareStatement(sql);
+            st= mainDB.prepareStatement(sql);
             st.setString(1, newValue);
             st.executeUpdate();
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed phonenumber of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change phonenumber of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
-    }
+    }//</editor-fold>
 
     /**
      * Set email of a contact
@@ -1065,14 +1286,21 @@ public class DigiDB {
      * @param newValue
      */
     public void setEmailOfContact(int id, String newValue) {
+        //<editor-fold defaultstate="collapsed" desc="code">
+
         String sql = "UPDATE digischema.contactpersons SET email =? WHERE id=" + id + ";";
+        PreparedStatement st = null;
         try {
-            PreparedStatement st = mainDB.prepareStatement(sql);
+            st = mainDB.prepareStatement(sql);
             st.setString(1, newValue);
             st.executeUpdate();
             LOGGER.log(Level.FINE, "User " + user.getUserName() + " changed email of contact: " + id);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "User " + user.getUserName() + " tried to change email of contact: " + id + "</br>" + ex.getMessage());
+            if (LOGGER.getLevel().equals(Level.FINEST)) {
+                LOGGER.log(Level.INFO, st.toString());
+            }
         }
     }
+//</editor-fold>
 }

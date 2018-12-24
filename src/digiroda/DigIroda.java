@@ -18,6 +18,7 @@
 package digiroda;
 
 import static digiroda.DigiController.LOGGER;
+import static digiroda.DigiController.language;
 import static digiroda.DigiController.user;
 import java.util.logging.Level;
 import javafx.application.Application;
@@ -43,6 +44,7 @@ public class DigIroda extends Application {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.getIcons().add(new Image("resources/images/office.png"));
+        stage.setTitle(language.getProperty("TEXT_MAINTITLE"));
         stage.setMaximized(true);
 
         Screen screen = Screen.getPrimary();

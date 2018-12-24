@@ -767,7 +767,7 @@ class DigiMenuListener {
                     Scene secondScene = new Scene(stackPane);
                     secondStage.setScene(secondScene);
                     secondStage.show();
-                    secondStage.setTitle(MENU_ACTUALLOG);
+                    secondStage.setTitle(MENU_CALENDAR);
                     secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
                     VBox vBox = new VBox();
                     vBox.getStyleClass().add("vbox");

@@ -72,7 +72,7 @@ public class DigiController implements Initializable {
     StackPane menuPane;
     @FXML
     StackPane dataPane;
-    @FXML
+/*    @FXML
     SplitPane contactsSplitPane;
     @FXML
     AnchorPane contactsDataPane;
@@ -83,7 +83,7 @@ public class DigiController implements Initializable {
     @FXML
     AnchorPane cleanAnchorFXML;  
     @FXML
-    ScrollPane cleanScrollFXML;  
+    ScrollPane cleanScrollFXML;  */
     @FXML
     Label label;
     @FXML
@@ -98,13 +98,13 @@ public class DigiController implements Initializable {
     TableView table;
     @FXML
     TextField filterText;
-    static SplitPane contactsSplitP;
-    static ScrollPane cleanScrollPane;
-    static StackPane cleanStackPane;
-    static AnchorPane cleanAnchorPane;
-    static TableView contactsTable;
+//    static SplitPane contactsSplitP;
+//    static ScrollPane cleanScrollPane;
+//    static StackPane cleanStackPane;
+//    static AnchorPane cleanAnchorPane;
+//    static TableView contactsTable;
     static StackPane dataP;
-    static TextField filterT;
+//    static TextField filterT;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Field's declarations">
@@ -211,26 +211,26 @@ public class DigiController implements Initializable {
 
     private void setFXML() {
                 
-        contactsSplitP=new SplitPane();
-        contactsSplitP=contactsSplitPane;
-        
-        cleanScrollPane=new ScrollPane();        
-        cleanScrollPane=cleanScrollFXML;
-        
-        cleanStackPane=new StackPane();        
-        cleanStackPane=cleanStackFXML;
-        
-        cleanAnchorPane=new AnchorPane();        
-        cleanAnchorPane=cleanAnchorFXML;
-        
-        contactsTable=new TableView();
-        contactsTable=table;
+//        contactsSplitP=new SplitPane();
+//        contactsSplitP=contactsSplitPane;
+//        
+//        cleanScrollPane=new ScrollPane();        
+//        cleanScrollPane=cleanScrollFXML;
+//        
+//        cleanStackPane=new StackPane();        
+//        cleanStackPane=cleanStackFXML;
+//        
+//        cleanAnchorPane=new AnchorPane();        
+//        cleanAnchorPane=cleanAnchorFXML;
+//        
+//        contactsTable=new TableView();
+//        contactsTable=table;
         
         dataP=new StackPane();
         dataP=dataPane;
         
-        filterT=new TextField();
-        filterT=filterText;
+//        filterT=new TextField();
+//        filterT=filterText;
         
         
     }   

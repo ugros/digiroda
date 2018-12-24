@@ -18,14 +18,14 @@
 package digiroda;
 
 import static digiroda.DigiController.LOGGER;
-import static digiroda.DigiController.cleanAnchorPane;
-import static digiroda.DigiController.cleanScrollPane;
-import static digiroda.DigiController.cleanStackPane;
+//import static digiroda.DigiController.cleanAnchorPane;
+//import static digiroda.DigiController.cleanScrollPane;
+//import static digiroda.DigiController.cleanStackPane;
 import static digiroda.DigiController.config;
-import static digiroda.DigiController.contactsSplitP;
-import static digiroda.DigiController.contactsTable;
+//import static digiroda.DigiController.contactsSplitP;
+//import static digiroda.DigiController.contactsTable;
 import static digiroda.DigiController.dataP;
-import static digiroda.DigiController.filterT;
+//import static digiroda.DigiController.filterT;
 import static digiroda.DigiController.language;
 import static digiroda.DigiController.user;
 
@@ -66,12 +66,14 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -90,6 +92,7 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import ussoft.USDialogs;
 
@@ -231,11 +234,15 @@ class DigiMenuListener {
                 } else if (selected.equals(MENU_SHOWCONTACTS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_SHOWCONTACTS">
                     if (user.checkRight("opencontacts")) {
-                        cleanScrollPane.setVisible(false);
-                        cleanAnchorPane.setVisible(false);
-                        cleanStackPane.setVisible(false);
-                        contactsSplitP.setVisible(true);
-                        contactsTable.getColumns().clear();
+                        Stage secondStage = new Stage();
+                        VBox vBox = new VBox();
+                        Scene secondScene = new Scene(vBox);
+                        secondStage.setScene(secondScene);
+                        secondStage.show();
+                        secondStage.setTitle(MENU_SHOWCONTACTS);
+                        secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
+                        
+                        TableView table = new TableView();
                         
                         ObservableList<DigiContacts> tableList = connects.getContacts();
 
@@ -293,9 +300,11 @@ class DigiMenuListener {
                         adress.setCellValueFactory(new PropertyValueFactory<>("adress"));
                         adress.setOnEditCommit(DigiHandlers.adressOnEditCommit());
 
-                        contactsTable.getColumns().addAll(companyN, familyN, firstN, phoneN, email, country, city, postalC, adress);
-                        contactsTable.setEditable(true);
+                        table.getColumns().addAll(companyN, familyN, firstN, phoneN, email, country, city, postalC, adress);
+                        table.setEditable(true);
 
+                        Label label = new Label(language.getProperty("TEXT_FILTER"));
+                        TextField filterT = new TextField();
                         FilteredList<DigiContacts> filteredList = new FilteredList<>(tableList);
                         filterT.textProperty().addListener((observable2, oldValue2, newValue2) -> {
                             filteredList.setPredicate(
@@ -311,11 +320,13 @@ class DigiMenuListener {
                             });
                         });
 
-                        contactsTable.setItems(filteredList);
-                        contactsTable.blendModeProperty();
-
-                        contactsTable.minWidthProperty().bind(dataP.widthProperty());
-                        contactsTable.maxWidthProperty().bind(dataP.widthProperty());
+                        table.setItems(filteredList);
+                        HBox hBox = new HBox();
+                        hBox.getChildren().addAll(label, filterT);
+                        vBox.getChildren().addAll(hBox, table);
+                        hBox.getStyleClass().add("hbox");
+                        vBox.getStyleClass().add("vbox");
+                        label.getStyleClass().add("padding10right");
                         LOGGER.log(Level.FINE, "User " + user.getUserName() + " checked contacts.");
                     } else {
                         LOGGER.log(Level.WARNING, user.getUserName() + " tried to check contacts.");
@@ -464,11 +475,14 @@ class DigiMenuListener {
                 } else if (selected.equals(MENU_OPTIONS)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_OPTIONS">
                     if (user.checkRight("manageoptions")) {
-                        cleanAnchorPane.setVisible(false);
-                        cleanStackPane.setVisible(false);
-                        contactsSplitP.setVisible(false);
-                        cleanScrollPane.setVisible(true);
+                        Stage secondStage = new Stage();
                         VBox vBox = new VBox();
+                        Scene secondScene = new Scene(vBox);
+                        secondStage.setScene(secondScene);
+                        secondStage.show();
+                        secondStage.setTitle(MENU_OPTIONS);
+                        secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
+                        
                         TableView table = new TableView();
 
                         ObservableList<Settings> tableList = FXCollections.observableArrayList();
@@ -513,10 +527,10 @@ class DigiMenuListener {
                         hBox.getStyleClass().add("hbox");
                         vBox.getStyleClass().add("vbox");
                         label.getStyleClass().add("padding10right");
-                        cleanScrollPane.setContent(vBox);
+/*                        scrollPane.setContent(vBox);
 
-                        table.minWidthProperty().bind(cleanScrollPane.widthProperty());
-                        table.maxWidthProperty().bind(cleanScrollPane.widthProperty());
+                        table.minWidthProperty().bind(scrollPane.widthProperty());
+                        table.maxWidthProperty().bind(scrollPane.widthProperty());*/
                         LOGGER.log(Level.FINE, "User " + user.getUserName() + " managed options.");
                     } else {
                         LOGGER.log(Level.WARNING, user.getUserName() + " tried to set options.");
@@ -587,11 +601,18 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_ARRIVE)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_ARRIVE">
-                    contactsSplitP.setVisible(false);
-                    cleanAnchorPane.setVisible(false);
-                    cleanStackPane.setVisible(false);
-                    cleanScrollPane.setVisible(true);
+                    Stage secondStage = new Stage();
 
+                    Screen screen = Screen.getPrimary();
+                    Rectangle2D bounds = screen.getVisualBounds();
+                    secondStage.setWidth(bounds.getWidth()*0.9);
+                    secondStage.setHeight(bounds.getHeight()*0.9);
+                    ScrollPane scrollPane = new ScrollPane();
+                    Scene secondScene = new Scene(scrollPane);
+                    secondStage.setScene(secondScene);
+                    secondStage.show();
+                    secondStage.setTitle(MENU_ARRIVE);
+                    secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
                     VBox vBox = new VBox();
                     vBox.getStyleClass().add("vbox");
                     gridPane = new GridPane();
@@ -603,7 +624,7 @@ class DigiMenuListener {
                     } else if (cols < 1) {
                         cols = 1;
                     }
-                    Double fullWidth = cleanScrollPane.getWidth();
+                    Double fullWidth = scrollPane.getWidth();
                     width = (fullWidth / cols) - 195;
                     final File directory = new File(config.getProperty("READFROM"));
 
@@ -620,7 +641,7 @@ class DigiMenuListener {
                     });
 
                     vBox.getChildren().addAll(gridPane);
-                    cleanScrollPane.setContent(vBox);
+                    scrollPane.setContent(vBox);
 
                     Task<Void> longRunningTask = new Task<Void>() {
                         private int counter;
@@ -741,16 +762,18 @@ class DigiMenuListener {
                     //</editor-fold>
                 } else if (selected.equals(MENU_CALENDAR)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_CALENDAR">
-                    contactsSplitP.setVisible(false);
-                    cleanAnchorPane.setVisible(false);
-                    cleanStackPane.setVisible(false);
-                    cleanScrollPane.setVisible(true);
-
+                    Stage secondStage = new Stage();
+                    StackPane stackPane = new StackPane();
+                    Scene secondScene = new Scene(stackPane);
+                    secondStage.setScene(secondScene);
+                    secondStage.show();
+                    secondStage.setTitle(MENU_ACTUALLOG);
+                    secondScene.getStylesheets().add(getClass().getResource("digi.css").toExternalForm());
                     VBox vBox = new VBox();
                     vBox.getStyleClass().add("vbox");
                     DigiCalendar calendar = new DigiCalendar(YearMonth.now());
                     vBox.getChildren().add(calendar.getView());
-                    cleanScrollPane.setContent(vBox);
+                    stackPane.getChildren().add(vBox);
                     //</editor-fold>
                 } else if (selected.equals(MENU_QUIT)) {
                     //<editor-fold defaultstate="collapsed" desc="MENU_QUIT">
